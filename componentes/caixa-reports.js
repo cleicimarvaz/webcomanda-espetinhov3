@@ -1,0 +1,895 @@
+/* =================================================================================
+   MÓDULO: RELATÓRIOS E FECHAMENTO DE CAIXA (INTEGRAL E BLINDADO)
+   ================================================================================= */
+
+/**
+ * Constrói o objeto de resumo a partir de vendas e movimentações.
+ * (Ajustado para ler JSON perfeitamente)
+ */
+window._construirResumo = function(nomeLoja, vendas, movs, valorInicial = 0) {
+    const resumo = {
+        loja:           nomeLoja,
+        totalVendido:   0,
+        totalDescontos: 0,
+        totalTaxas:     0,
+        metodos:        {
+            'DINHEIRO': 0,
+            'PIX': 0,
+            'CRÉDITO': 0,
+            'DÉBITO': 0,
+            'OUTROS': 0
+        },
+        suprimentos:    0,
+        sangrias:       0,
+        dinheiroEmVendas: 0,
+        vendasRaw:      vendas,
+        movsRaw:        movs,
+        itensVendidos:  {},
+        vendasPorVendedor: {},
+        valorInicial: parseFloat(valorInicial) || 0
+    };
+
+    vendas.forEach(v => {
+        // Ignora vendas canceladas para não inflar o faturamento!
+        if (v.status === 'cancelada' || v.status === 'cancelado') return;
+
+        const totalVenda = parseFloat(v.total) || 0;
+        resumo.totalVendido   += totalVenda;
+        resumo.totalDescontos += parseFloat(v.desconto || 0);
+        resumo.totalTaxas     += parseFloat(v.taxa_servico || 0);
+
+        // ========================================================
+        // A MÁGICA AQUI: Separação rigorosa de Crédito e Débito
+        // ========================================================
+        let m = (v.forma_pagamento || 'DINHEIRO').toUpperCase();
+        
+        if (m.includes('CRÉDITO') || m.includes('CREDITO')) {
+            m = 'CRÉDITO';
+        } else if (m.includes('DÉBITO') || m.includes('DEBITO')) {
+            m = 'DÉBITO';
+        } else if (m.includes('PIX')) {
+            m = 'PIX';
+        } else if (m.includes('DINHEIRO')) {
+            m = 'DINHEIRO';
+        } else {
+            m = 'OUTROS';
+        }
+
+        // Soma no bucket correto
+        resumo.metodos[m] += totalVenda;
+        
+        if (m === 'DINHEIRO') {
+            resumo.dinheiroEmVendas += totalVenda;
+        }
+
+        const vendedor = v.atendente || v.usuario || v.vendedor || 'SISTEMA';
+        resumo.vendasPorVendedor[vendedor] = (resumo.vendasPorVendedor[vendedor] || 0) + totalVenda;
+
+        let itensArr = [];
+        if (typeof v.itens === 'string') {
+            try { 
+                itensArr = JSON.parse(v.itens); 
+            } catch(e) {
+                console.warn("Falha ao ler itens da venda", v.id);
+            }
+        } else if (Array.isArray(v.itens)) {
+            itensArr = v.itens;
+        }
+
+        (itensArr || []).forEach(i => {
+            const preco = parseFloat(i.preco) || 0;
+            const nomeItem = i.nome || '';
+            if (preco > 0 && !nomeItem.toUpperCase().includes('PGTO')) {
+                const nomeF = typeof formatarNomeProduto === 'function' ? formatarNomeProduto(nomeItem) : nomeItem;
+                resumo.itensVendidos[nomeF] = (resumo.itensVendidos[nomeF] || 0) + (i.qtd || 1);
+            }
+        });
+    });
+
+    movs.forEach(m => {
+        const val = parseFloat(m.valor) || 0;
+        if (m.tipo === 'SUPRIMENTO') resumo.suprimentos += val;
+        if (m.tipo === 'SANGRIA')    resumo.sangrias    += val;
+    });
+
+    resumo.saldoGaveta = (resumo.dinheiroEmVendas + resumo.valorInicial + resumo.suprimentos) - resumo.sangrias;
+    return resumo;
+};
+
+/* =============================================================
+    CONTROLE DO MODAL DE CONFIRMAÇÃO (SISTEMA)
+   ============================================================= */
+let acaoPendente = null;
+
+window.abrirModalConfirmacao = function(titulo, mensagem, callback) {
+    document.getElementById('titulo-modal-conf').innerText = titulo;
+    document.getElementById('msg-modal-conf').innerText = mensagem;
+    acaoPendente = callback;
+    document.getElementById('modal-confirmacao-sistema').classList.remove('hidden');
+};
+
+window.fecharModalConfirmacao = function() {
+    const modal = document.getElementById('modal-confirmacao-sistema');
+    if (modal) modal.classList.add('hidden');
+    acaoPendente = null;
+};
+
+window.executarConfirmacao = function() {
+    if (acaoPendente) acaoPendente();
+    window.fecharModalConfirmacao();
+};
+
+/* =============================================================
+    ENCERRAMENTO DE CAIXA: TURNO (PARCIAL) E FINAL (COM SENHA)
+   ============================================================= */
+
+// --- 1. IMPRIMIR PARCIAL (LEITURA X) ---
+window.imprimirRelatorioParcialX = function() {
+    window.abrirModalConfirmacao(
+        "RESUMO PARCIAL",
+        "Deseja imprimir o resumo parcial do turno atual? O caixa continuará aberto e pronto para novas vendas.",
+        () => window.executarEncerramentoParcial() 
+    );
+};
+
+window.executarEncerramentoParcial = async function() {
+    try {
+        if(typeof showToast === 'function') showToast("Gerando impressão parcial...", "info");
+        
+        const idCx = localStorage.getItem('idCaixaAtual');
+        if(!idCx) {
+            if(typeof showToast === 'function') showToast("Nenhum caixa aberto para este terminal.", "aviso");
+            return;
+        }
+
+        const { data: cx } = await _supabase.from('caixa').select('*').eq('id', idCx).single();
+        if(!cx) return;
+        
+        const [resV, resM] = await Promise.all([
+            _supabase.from('historico_vendas').select('*').eq('id_caixa', idCx).neq('status', 'estornada'),
+            _supabase.from('movimentacoes_caixa').select('*').eq('id_caixa', idCx)
+        ]);
+
+        let totDinheiro = 0, totPix = 0, totCredito = 0, totDebito = 0;
+        
+        (resV.data || []).forEach(v => {
+            // Ignora cancelamentos assim como no dashboard
+            if (v.status === 'cancelada' || v.status === 'cancelado') return;
+
+            const val = parseFloat(v.total || 0);
+            const pg = (v.forma_pagamento || 'DINHEIRO').toUpperCase();
+            
+            // Separação correta igual ao arquivo principal
+            if (pg.includes('CRÉDITO') || pg.includes('CREDITO')) {
+                totCredito += val;
+            } else if (pg.includes('DÉBITO') || pg.includes('DEBITO')) {
+                totDebito += val;
+            } else if (pg.includes('PIX')) {
+                totPix += val;
+            } else {
+                totDinheiro += val; 
+            }
+        });
+        
+        let sang = 0, supr = 0;
+        (resM.data || []).forEach(m => {
+            const val = parseFloat(m.valor || 0);
+            if (m.tipo === 'SANGRIA') sang += val; else supr += val;
+        });
+
+        const inicial = parseFloat(cx.valor_inicial || 0);
+        const saldoGaveta = (inicial + totDinheiro + supr) - sang;
+
+        // Dispara a impressão para a função centralizada do print.js
+        if (typeof window.imprimirFechamentoTermico === 'function') {
+            window.imprimirFechamentoTermico({
+                id: idCx, 
+                tipo: "RESUMO PARCIAL (X)",
+                operador: cx.criado_por || 'Admin',
+                abertura: cx.aberto_em,
+                fechamento: new Date().toISOString(),
+                inicial: inicial, 
+                dinheiro: totDinheiro, 
+                cartao: totCredito + totDebito, // Junta para exibição se o layout de tickets esperar 'cartao'
+                credito: totCredito, 
+                debito: totDebito,
+                pix: totPix,
+                sangrias: sang, 
+                suprimentos: supr, 
+                saldoGaveta: saldoGaveta
+            }, true);
+        } else {
+            console.error('Motor central de impressão não encontrado.');
+            if(typeof showToast === 'function') showToast("Falha na comunicação com a impressora.", "erro");
+        }
+
+        if(typeof showToast === 'function') showToast("Resumo de turno enviado para impressora!", "sucesso");
+
+    } catch (e) { 
+        console.error(e);
+        if(typeof showToast === 'function') showToast("Erro ao gerar parcial: " + e.message, "erro");
+    }
+};
+
+// --- 2. FECHAMENTO DEFINITIVO COM SENHA NO BANCO (ADMIN) ---
+
+window.abrirModalSenhaAdmin = function() {
+    const input = document.getElementById('input-senha-admin');
+    const modal = document.getElementById('modal-senha-admin');
+    
+    if(input) input.value = '';
+    if(modal) modal.classList.remove('hidden');
+    
+    setTimeout(() => { if(input) input.focus(); }, 300);
+};
+
+window.fecharModalSenha = function() {
+    const modal = document.getElementById('modal-senha-admin');
+    if(modal) modal.classList.add('hidden');
+};
+
+window.validarFechamentoGeral = async function() {
+    const input = document.getElementById('input-senha-admin');
+    if(!input) return;
+    
+    const senhaDigitada = input.value;
+
+    if (!senhaDigitada) {
+        if(typeof showToast === 'function') showToast("DIGITE A SENHA DO ADMINISTRADOR!", "aviso");
+        return;
+    }
+
+    try {
+        if(typeof showToast === 'function') showToast("Validando credenciais...", "info");
+
+        const { data: admin, error } = await _supabase
+            .from('usuarios') 
+            .select('id, role, nivel')
+            .eq('senha', senhaDigitada)
+            .maybeSingle();
+
+        if (error) {
+            console.error("Erro do Supabase:", error);
+            if(typeof showToast === 'function') showToast("ERRO AO BUSCAR USUÁRIO!", "erro");
+            return;
+        }
+
+        if (!admin) {
+            if(typeof showToast === 'function') showToast("SENHA INCORRETA!", "erro");
+            return;
+        }
+
+        const isAdm = (admin.role && admin.role.toUpperCase() === 'ADMIN') || 
+                      (admin.nivel && admin.nivel.toUpperCase() === 'ADMIN');
+
+        if (!isAdm) {
+            if(typeof showToast === 'function') showToast("ESTE USUÁRIO NÃO É ADMINISTRADOR!", "erro");
+            return;
+        }
+
+        window.fecharModalSenha();
+        await window.executarFechamentoDefinitivoBanco();
+
+    } catch (e) {
+        console.error("Erro na validação:", e);
+        if(typeof showToast === 'function') showToast("ERRO DE CONEXÃO AO VALIDAR!", "erro");
+    }
+};
+
+window.executarFechamentoDefinitivoBanco = async function() {
+    try {
+        if(typeof showToast === 'function') showToast("Finalizando Caixa...", "info");
+
+        const idCx = localStorage.getItem('idCaixaAtual');
+        if(!idCx) {
+            if(typeof showToast === 'function') showToast("Erro: Nenhum caixa ativo encontrado no terminal.", "aviso");
+            return;
+        }
+        
+        const { data: cx } = await _supabase.from('caixa').select('*').eq('id', idCx).single();
+        if(!cx) return;
+
+        const [resV, resM] = await Promise.all([
+            _supabase.from('historico_vendas').select('*').eq('id_caixa', idCx).neq('status', 'estornada'),
+            _supabase.from('movimentacoes_caixa').select('*').eq('id_caixa', idCx)
+        ]);
+
+        let totD = 0, totPix = 0, totC = 0, totDeb = 0, sang = 0, supr = 0;
+        
+        (resV.data || []).forEach(v => {
+            if (v.status === 'cancelada' || v.status === 'cancelado') return;
+
+            const vlr = parseFloat(v.total || 0);
+            const pg = (v.forma_pagamento || '').toUpperCase();
+            
+            if (pg.includes('CRÉDITO') || pg.includes('CREDITO')) totC += vlr;
+            else if (pg.includes('DÉBITO') || pg.includes('DEBITO')) totDeb += vlr;
+            else if (pg.includes('PIX')) totPix += vlr;
+            else totD += vlr;
+        });
+        
+        (resM.data || []).forEach(m => {
+            const vlr = parseFloat(m.valor || 0);
+            if (m.tipo === 'SANGRIA') sang += vlr; else supr += vlr;
+        });
+
+        const inicial = parseFloat(cx.valor_inicial || 0);
+        const saldoGaveta = (inicial + totD + supr) - sang;
+        const dataFechamento = new Date().toISOString();
+
+        // 1. Salva Status Fechado no Supabase
+        const { error: errUpd } = await _supabase
+            .from('caixa')
+            .update({
+                status: 'fechado',
+                fechado_em: dataFechamento,
+                valor_final_dinheiro: totD,
+                valor_final_cartao: totC + totDeb, // Salva consolidado para não quebrar tabelas antigas
+                valor_final_pix: totPix
+            })
+            .eq('id', idCx);
+
+        if (errUpd) throw errUpd;
+
+        if (typeof registrarLog === 'function') {
+            await registrarLog('FINANCEIRO', 'FECHAMENTO DEFINITIVO DE CAIXA (Z)', `CAIXA ID ${idCx} | DINHEIRO: R$ ${totD.toFixed(2)} | CARTÃO: R$ ${(totC + totDeb).toFixed(2)} | PIX: R$ ${totPix.toFixed(2)} | SALDO GAVETA: R$ ${saldoGaveta.toFixed(2)}`);
+        }
+
+        // --- 2. LIMPEZA TOTAL DA MEMÓRIA DO TURNO ---
+        localStorage.removeItem('idCaixaAtual');
+        localStorage.removeItem('dataAberturaCaixa');
+        localStorage.removeItem('horaAberturaCaixa'); 
+
+        // 3. Imprime cupom definitivo via motor central (print.js) e força Reload
+        if (typeof window.imprimirFechamentoTermico === 'function') {
+            window.imprimirFechamentoTermico({
+                id: idCx,
+                tipo: "FECHAMENTO DEFINITIVO (Z)",
+                operador: cx.criado_por || 'Sistema',
+                abertura: cx.aberto_em,
+                fechamento: dataFechamento,
+                inicial: inicial,
+                dinheiro: totD, 
+                cartao: totC + totDeb, 
+                credito: totC,
+                debito: totDeb,
+                pix: totPix,
+                sangrias: sang, 
+                suprimentos: supr, 
+                saldoGaveta: saldoGaveta
+            }, false); 
+        } else {
+            console.warn("A função central imprimirFechamentoTermico não foi encontrada. Recarregando...");
+            window.location.reload();
+        }
+
+    } catch (e) {
+        console.error(e);
+        if(typeof showToast === 'function') showToast("Erro no fechamento definitivo: " + e.message, "erro");
+    }
+};
+
+/* --- A FUNÇÃO DE IMPRESSÃO VIA IFRAME FOI DELETADA DAQUI --- */
+/* O sistema passa a utilizar automaticamente a 'window.imprimirFechamentoTermico'
+   que construímos no arquivo print.js, e que lê a variável 'cfg' do hardware. */
+
+/* =================================================================================
+   FUNÇÕES DE HISTÓRICO DE CAIXAS FECHADOS
+   ================================================================================= */
+
+window.carregarHistoricoCaixas = async function(dataInicio, dataFim) {
+    if (typeof isDatabaseReady === 'function' && !isDatabaseReady()) return;
+
+    const container  = document.getElementById('lista-caixas-fechados');
+    if (!container) return;
+
+    // Tela de carregamento (Skeleton)
+    container.innerHTML = `
+        <div class="animate-pulse space-y-4">
+            <div class="h-32 bg-slate-200 dark:bg-slate-800/50 rounded-[2rem] w-full"></div>
+            <div class="h-32 bg-slate-200 dark:bg-slate-800/50 rounded-[2rem] w-full"></div>
+        </div>`;
+
+    try {
+        let query = _supabase
+            .from('caixa')
+            .select('*')
+            .order('aberto_em', { ascending: false })
+            .limit(30); // Limita aos últimos 30 caixas para não travar o celular
+
+        if (dataInicio && dataFim) {
+            query = _supabase
+                .from('caixa')
+                .select('*')
+                .gte('aberto_em', `${dataInicio}T00:00:00`)
+                .lte('aberto_em', `${dataFim}T23:59:59`)
+                .order('aberto_em', { ascending: false });
+        }
+
+        const { data: caixas, error } = await query;
+        if (error) throw error;
+
+        if (!caixas || caixas.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-16">
+                    <i data-lucide="inbox" class="w-10 h-10 mx-auto mb-3 opacity-30"></i>
+                    <p class="text-slate-400 font-black uppercase tracking-widest text-[10px]">Nenhum caixa encontrado neste período.</p>
+                </div>`;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            return;
+        }
+
+        const formatarBRL = (valor) => parseFloat(valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        // A MÁGICA PARA BATER 100% COM O PDF:
+        // Busca as vendas individualmente por caixa para driblar o limite de 1000 linhas do Supabase
+        const caixasProcessados = await Promise.all(caixas.map(async (cx) => {
+            
+            const [ { data: vendasCaixa }, { data: movsCaixa } ] = await Promise.all([
+                _supabase.from('historico_vendas').select('total, forma_pagamento, status').eq('id_caixa', cx.id),
+                _supabase.from('movimentacoes_caixa').select('valor, tipo, motivo').eq('id_caixa', cx.id)
+            ]);
+
+            const isOpen = cx.status !== 'fechado';
+            const abertura = new Date(cx.aberto_em);
+            const fechamento = cx.fechado_em ? new Date(cx.fechado_em) : null;
+            
+            let totDinheiro = 0, totPix = 0, totCredito = 0, totDebito = 0;
+            
+            (vendasCaixa || []).forEach(v => {
+                // Inteligência idêntica a do PDF para ignorar cancelados
+                if (v.status === 'cancelada' || v.status === 'cancelado' || v.status === 'estornada') return;
+
+                const val = parseFloat(v.total || 0);
+                const pg = (v.forma_pagamento || 'DINHEIRO').toUpperCase();
+                
+                if (pg.includes('CRÉDITO') || pg.includes('CREDITO')) {
+                    totCredito += val;
+                } else if (pg.includes('DÉBITO') || pg.includes('DEBITO')) {
+                    totDebito += val;
+                } else if (pg.includes('PIX')) {
+                    totPix += val;
+                } else {
+                    totDinheiro += val;
+                }
+            });
+
+            let sangrias = 0, suprimentos = 0;
+            (movsCaixa || []).forEach(m => {
+                const val = parseFloat(m.valor || 0);
+                if (m.tipo === 'SANGRIA') sangrias += val; 
+                else if (m.tipo === 'SUPRIMENTO') suprimentos += val;
+            });
+
+            const inicial = parseFloat(cx.valor_inicial || 0);
+            const saldoRealGaveta = (inicial + totDinheiro + suprimentos) - sangrias;
+            const totalFaturamento = totDinheiro + totPix + totCredito + totDebito;
+
+            let htmlMovs = (movsCaixa || []).length === 0 
+                ? `<p class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase italic py-2 text-center">Nenhum suprimento ou sangria lançado.</p>`
+                : (movsCaixa || []).map(m => `
+                    <div class="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800/40 last:border-0">
+                        <span class="text-[9px] font-black uppercase ${m.tipo === 'SANGRIA' ? 'text-red-500' : 'text-emerald-500'} inline-flex items-center gap-1">
+                            <i data-lucide="circle" class="w-2 h-2 fill-current" aria-hidden="true"></i> ${m.tipo === 'SANGRIA' ? 'Sangria' : 'Suprimento'} - ${m.motivo}
+                        </span>
+                        <span class="text-[9px] font-black text-slate-600 dark:text-slate-300">R$ ${formatarBRL(m.valor)}</span>
+                    </div>
+                `).join('');
+
+            const badgeStatus = isOpen 
+                ? `<span class="bg-emerald-500 text-white text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest animate-pulse shadow-sm shadow-emerald-500/20 inline-flex items-center gap-1"><i data-lucide="circle" class="w-2 h-2 fill-current" aria-hidden="true"></i> CAIXA ABERTO</span>`
+                : `<span class="bg-slate-700 text-white text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider">Turno #${cx.id}</span>`;
+
+            const stringAbertura = `Abertura: ${abertura.toLocaleDateString('pt-BR')} às ${abertura.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            const stringFechamento = isOpen 
+                ? `Fechamento: <span class="text-emerald-500 font-black uppercase tracking-wider">Aguardando Encerramento</span>`
+                : `Fechamento: ${fechamento.toLocaleDateString('pt-BR')} às ${fechamento.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+            return `
+            <div class="bg-white dark:bg-slate-900 p-5 rounded-[2.2rem] shadow-sm border border-slate-100 dark:border-slate-800 mb-4 transition-all relative">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            ${badgeStatus}
+                            ${!isOpen ? `<span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase">#${cx.id}</span>` : ''}
+                        </div>
+                        <div class="space-y-0.5">
+                            <p class="font-black text-slate-700 dark:text-slate-200 text-[10px] uppercase tracking-tight">${stringAbertura}</p>
+                            <p class="font-black text-slate-600 dark:text-slate-300 text-[10px] uppercase tracking-tight">${stringFechamento}</p>
+                        </div>
+                        <p class="text-[8px] font-black text-slate-400 dark:text-slate-500 mt-2 uppercase tracking-wide">Operador: ${cx.criado_por || 'Sistema'}</p>
+                    </div>
+                    
+                    <button onclick="window.regerarPDFRetroativo(${cx.id})" class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm active:scale-95 transition-all hover:bg-slate-200 dark:hover:bg-slate-700">
+                        <i data-lucide="printer" class="w-4 h-4" aria-hidden="true"></i>
+                        <span class="text-[9px] font-black uppercase tracking-widest hidden sm:inline">${isOpen ? 'Parcial' : 'Relatório'}</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-3 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl gap-2 mb-3 border border-slate-100 dark:border-slate-700">
+                    <div class="flex flex-col">
+                        <span class="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase">Fundo Inicial</span>
+                        <span class="text-[10px] font-bold text-slate-600 dark:text-slate-300">R$ ${formatarBRL(inicial)}</span>
+                    </div>
+                    <div class="flex flex-col text-center">
+                        <span class="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase">Faturamento</span>
+                        <span class="text-[10px] font-bold text-blue-500">R$ ${formatarBRL(totalFaturamento)}</span>
+                    </div>
+                    <div class="flex flex-col text-right">
+                        <span class="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase">Saldo em Gaveta</span>
+                        <span class="text-[12px] font-black text-emerald-500">R$ ${formatarBRL(saldoRealGaveta)}</span>
+                    </div>
+                </div>
+
+                <button onclick="window.toggleMovimentosCard('${cx.id}')" class="w-full flex justify-between items-center text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase italic py-4 px-2 border-t border-slate-100 dark:border-slate-800 mt-2 hover:text-slate-700 dark:hover:text-slate-300 transition-all active:scale-[0.99] bg-slate-50/50 dark:bg-slate-800/30 rounded-xl">
+                    <span class="pointer-events-none inline-flex items-center gap-1"><i data-lucide="bar-chart-3" class="w-3 h-3" aria-hidden="true"></i> Ver Resumo Completo do Turno</span>
+                    <span id="icone-mov-${cx.id}" class="text-[10px] pointer-events-none transition-transform">▼</span>
+                </button>
+                
+                <div id="movimentos-card-${cx.id}" class="hidden space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800/40 mt-1">
+                    
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 p-2 rounded-xl text-center shadow-inner">
+                            <p class="text-[7px] font-black text-slate-400 uppercase">Dinheiro</p>
+                            <p class="text-[10px] font-black text-slate-700 dark:text-slate-200">R$ ${formatarBRL(totDinheiro)}</p>
+                        </div>
+                        <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 p-2 rounded-xl text-center shadow-inner">
+                            <p class="text-[7px] font-black text-slate-400 uppercase">PIX</p>
+                            <p class="text-[10px] font-black text-slate-700 dark:text-slate-200">R$ ${formatarBRL(totPix)}</p>
+                        </div>
+                        <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 p-2 rounded-xl text-center shadow-inner">
+                            <p class="text-[7px] font-black text-slate-400 uppercase">Crédito</p>
+                            <p class="text-[10px] font-black text-slate-700 dark:text-slate-200">R$ ${formatarBRL(totCredito)}</p>
+                        </div>
+                        <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 p-2 rounded-xl text-center shadow-inner">
+                            <p class="text-[7px] font-black text-slate-400 uppercase">Débito</p>
+                            <p class="text-[10px] font-black text-slate-700 dark:text-slate-200">R$ ${formatarBRL(totDebito)}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-emerald-50/40 dark:bg-emerald-950/10 border border-emerald-100/50 dark:border-emerald-900/20 p-2 rounded-xl text-center">
+                            <p class="text-[7px] font-black text-emerald-600 dark:text-emerald-400 uppercase">(+) Suprimentos</p>
+                            <p class="text-[10px] font-black text-emerald-600 dark:text-emerald-400">R$ ${formatarBRL(suprimentos)}</p>
+                        </div>
+                        <div class="bg-red-50/40 dark:bg-red-950/10 border border-red-100/50 dark:border-red-900/20 p-2 rounded-xl text-center">
+                            <p class="text-[7px] font-black text-red-500 uppercase">(-) Sangrias</p>
+                            <p class="text-[10px] font-black text-red-500">R$ ${formatarBRL(sangrias)}</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
+                        <h4 class="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 border-b border-slate-200 dark:border-slate-700 pb-1">Extrato de Entradas e Saídas Extras</h4>
+                        ${htmlMovs}
+                    </div>
+                </div>
+            </div>`;
+        }));
+
+        // Junta tudo e joga na tela!
+        container.innerHTML = caixasProcessados.join('');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    } catch (e) {
+        console.error('[CAIXA-REPORTS] Erro ao carregar histórico:', e);
+        container.innerHTML = `<p class="text-center text-red-500 font-black uppercase italic text-[10px] py-10">Erro ao buscar dados. Verifique a conexão.</p>`;
+    }
+};
+
+window.regerarPDFRetroativo = async function(idCaixa) {
+    if (typeof isDatabaseReady === 'function' && !isDatabaseReady()) return;
+    if (typeof showToast === 'function') showToast('RECUPERANDO DADOS...');
+
+    try {
+        const [ { data: cx }, { data: vendas }, { data: movs } ] = await Promise.all([
+            _supabase.from('caixa').select('*').eq('id', idCaixa).single(),
+            _supabase.from('historico_vendas').select('*').eq('id_caixa', idCaixa),
+            _supabase.from('movimentacoes_caixa').select('*').eq('id_caixa', idCaixa)
+        ]);
+
+        if (!cx || !vendas) throw new Error('Dados não encontrados.');
+
+        const nomeLoja = cx.loja || localStorage.getItem('nomeLoja') || 'ESPETINHO & CIA';
+        const resumo = window._construirResumo(nomeLoja, vendas, movs || [], parseFloat(cx.valor_inicial) || 0);
+
+        if (typeof exportarFechamentoPDF === 'function') {
+            exportarFechamentoPDF(resumo);
+            if (typeof showToast === 'function') showToast('PDF RECUPERADO!', 'sucesso');
+        }
+    } catch (e) {
+        console.error('Erro ao regerar PDF:', e);
+        if (typeof showToast === 'function') showToast('ERRO AO RECUPERAR', 'erro');
+    }
+};
+
+window.toggleFiltroPeriodoCaixas = function() {
+    const container = document.getElementById('container-periodo-caixas');
+    if(!container) return;
+    
+    container.classList.toggle('hidden');
+    
+    ['0', '7', '30'].forEach(d => {
+        const btn = document.getElementById(`btn-hist-${d}`);
+        if(btn) btn.className = 'flex-1 py-3 text-[9px] font-black uppercase rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700';
+    });
+    
+    const btnPer = document.getElementById('btn-hist-periodo');
+    if(btnPer) {
+        if(container.classList.contains('hidden')) {
+            btnPer.className = 'flex-1 py-3 text-[9px] font-black uppercase rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700';
+        } else {
+            btnPer.className = 'flex-1 py-3 text-[9px] font-black uppercase rounded-lg transition-all bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400';
+        }
+    }
+};
+
+window.aplicarFiltroCaixas = function(dias) {
+    let dataInicio = null;
+    let dataFim = new Date().toISOString().split('T')[0];
+
+    if (dias === 'custom') {
+        dataInicio = document.getElementById('data-inicio-caixas')?.value;
+        dataFim = document.getElementById('data-fim-caixas')?.value;
+        if (!dataInicio || !dataFim) {
+            if (typeof showToast === 'function') showToast('Preencha as datas!', 'erro');
+            return;
+        }
+    } else {
+        const container = document.getElementById('container-periodo-caixas');
+        if(container && !container.classList.contains('hidden')) container.classList.add('hidden');
+        
+        ['0', '7', '30', 'periodo'].forEach(d => {
+            const btn = document.getElementById(`btn-hist-${d}`);
+            if(btn) btn.className = 'flex-1 py-3 text-[9px] font-black uppercase rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700';
+        });
+        
+        const btnAtivo = document.getElementById(`btn-hist-${dias}`);
+        if(btnAtivo) btnAtivo.className = 'flex-1 py-3 text-[9px] font-black uppercase rounded-lg transition-all bg-white dark:bg-slate-700 shadow-sm text-slate-700 dark:text-slate-200';
+
+        if (dias > 0) {
+            const d = new Date();
+            d.setDate(d.getDate() - dias);
+            dataInicio = d.toISOString().split('T')[0];
+        } else {
+            dataInicio = dataFim; 
+        }
+    }
+
+    if (typeof window.carregarHistoricoCaixas === 'function') {
+        window.carregarHistoricoCaixas(dataInicio, dataFim);
+    }
+};
+
+window.toggleMovimentosCard = function(idCaixa) {
+    const el = document.getElementById(`movimentos-card-${idCaixa}`);
+    const icone = document.getElementById(`icone-mov-${idCaixa}`);
+    if(!el || !icone) return;
+    
+    if (el.classList.contains('hidden')) {
+        el.classList.remove('hidden');
+        icone.innerText = '▲';
+    } else {
+        el.classList.add('hidden');
+        icone.innerText = '▼';
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.location.pathname.includes('historico-caixas.html')) {
+        window.aplicarFiltroCaixas(0);
+    }
+});
+
+window.exportarFechamentoPDF = function(resumo) {
+    if (typeof window.gerarPDFConsolidado === 'function') {
+        window.gerarPDFConsolidado(resumo);
+    } else {
+        if (typeof showToast === 'function') showToast("Erro: Módulo não carregado", "erro");
+    }
+};
+
+/* =============================================================
+   FLUXO FINANCEIRO COM DRILL-DOWN (DETALHAMENTO)
+   ============================================================= */
+
+window.dadosFluxoAtual = { entradas: [], saidas: [] };
+
+window.togglePeriodoFinanceiro = function() {
+    document.getElementById('container-periodo-fin').classList.toggle('hidden');
+};
+
+window.mudarFiltroFinanceiro = function(dias) {
+    [0, 7, 30, 99].forEach(d => {
+        const btn = document.getElementById(`btn-fin-${d}`);
+        if(btn) {
+            btn.classList.remove('bg-white', 'dark:bg-slate-700', 'text-slate-800', 'dark:text-white', 'shadow-sm');
+            btn.classList.add('text-slate-400');
+        }
+    });
+
+    const btnAtivo = document.getElementById(`btn-fin-${dias === 'custom' ? 99 : dias}`);
+    if(btnAtivo) {
+        btnAtivo.classList.add('bg-white', 'dark:bg-slate-700', 'text-slate-800', 'dark:text-white', 'shadow-sm');
+        btnAtivo.classList.remove('text-slate-400');
+    }
+
+    if (dias !== 'custom') {
+        const hoje = new Date();
+        const dataFim = hoje.toISOString().split('T')[0];
+        const dataIni = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() - dias).toISOString().split('T')[0];
+        
+        document.getElementById('data-inicio-fin').value = dataIni;
+        document.getElementById('data-fim-fin').value = dataFim;
+        document.getElementById('container-periodo-fin').classList.add('hidden');
+    }
+
+    const abaAtiva = window.abaFinanceiraAtiva || 'fluxo';
+    if (abaAtiva === 'categoria' && typeof window.gerarRelatorioDespesasCategoria === 'function') window.gerarRelatorioDespesasCategoria();
+    else if (abaAtiva === 'dre' && typeof window.gerarDRE === 'function') window.gerarDRE();
+    else if (abaAtiva === 'comparativo' && typeof window.gerarComparativoFinanceiro === 'function') window.gerarComparativoFinanceiro();
+    else if (abaAtiva === 'projetado' || abaAtiva === 'metas') { /* usam período/mês próprios, não o filtro de data padrão */ }
+    else gerarRelatorioFinanceiro();
+};
+
+window.gerarRelatorioFinanceiro = async function() {
+    const inputIni = document.getElementById('data-inicio-fin');
+    const inputFim = document.getElementById('data-fim-fin');
+    const container = document.getElementById('conteudo-rel-financeiro');
+    const resumoContainer = document.getElementById('resumo-financeiro-cards');
+
+    if (!inputIni.value) inputIni.value = new Date().toISOString().split('T')[0];
+    if (!inputFim.value) inputFim.value = new Date().toISOString().split('T')[0];
+
+    const dataIni = inputIni.value;
+    const dataFim = inputFim.value;
+
+    if (!container || !resumoContainer) return;
+
+    container.innerHTML = `<div class="py-10 text-center animate-pulse text-[10px] font-black uppercase text-slate-400 italic">Processando Fluxo...</div>`;
+
+    try {
+        const dtIniISO = dataIni + "T00:00:00Z";
+        const dtFimISO = dataFim + "T23:59:59Z";
+
+        const [resVendas, resMovs, resDespesas] = await Promise.all([
+            _supabase.from('historico_vendas').select('*').gte('created_at', dtIniISO).lte('created_at', dtFimISO).neq('status', 'estornada'),
+            _supabase.from('movimentacoes_caixa').select('*').gte('created_at', dtIniISO).lte('created_at', dtFimISO),
+            _supabase.from('despesas').select('*').eq('paga', true).gte('data_pagamento', dataIni).lte('data_pagamento', dataFim)
+        ]);
+
+        let totalEntradas = 0, totalSaidas = 0;
+        const vendas = resVendas.data || [];
+        const movs = resMovs.data || [];
+        const despesas = resDespesas.data || [];
+
+        vendas.forEach(v => totalEntradas += parseFloat(v.total || 0));
+        movs.forEach(m => {
+            if (m.tipo === 'SUPRIMENTO') totalEntradas += parseFloat(m.valor || 0);
+            else totalSaidas += parseFloat(m.valor || 0);
+        });
+        despesas.forEach(d => totalSaidas += parseFloat(d.valor || 0));
+
+        window.dadosFluxoAtual.entradas = vendas;
+        window.dadosFluxoAtual.saidas = [
+            ...despesas.map(d => ({ desc: d.descricao, valor: d.valor, cat: d.categoria, data: d.data_pagamento })),
+            ...movs.filter(m => m.tipo === 'SANGRIA').map(m => ({ desc: m.motivo || 'SANGRIA', valor: m.valor, cat: 'CAIXA', data: m.created_at }))
+        ];
+
+        const saldo = totalEntradas - totalSaidas;
+        resumoContainer.innerHTML = `
+            <div onclick="detalharEntradasFluxo()" class="bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-100 dark:border-slate-800 text-center cursor-pointer active:scale-95 hover:border-emerald-200 dark:hover:border-emerald-900/50 transition-all shadow-sm">
+                <p class="text-[6px] font-black text-slate-400 uppercase inline-flex items-center gap-0.5">Entradas <i data-lucide="search" class="w-2.5 h-2.5" aria-hidden="true"></i></p>
+                <p class="text-[10px] font-black text-emerald-500">R$ ${totalEntradas.toFixed(2).replace('.', ',')}</p>
+            </div>
+            <div onclick="detalharSaidasFluxo()" class="bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-100 dark:border-slate-800 text-center cursor-pointer active:scale-95 hover:border-red-200 dark:hover:border-red-900/50 transition-all shadow-sm">
+                <p class="text-[6px] font-black text-slate-400 uppercase inline-flex items-center gap-0.5">Saídas <i data-lucide="search" class="w-2.5 h-2.5" aria-hidden="true"></i></p>
+                <p class="text-[10px] font-black text-red-500">R$ ${totalSaidas.toFixed(2).replace('.', ',')}</p>
+            </div>
+            <div class="bg-slate-800 dark:bg-slate-700 p-2 rounded-xl text-center shadow-lg">
+                <p class="text-[6px] font-black text-slate-400 uppercase">Saldo</p>
+                <p class="text-[10px] font-black text-white">R$ ${saldo.toFixed(2).replace('.', ',')}</p>
+            </div>
+        `;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        if (vendas.length === 0 && movs.length === 0 && despesas.length === 0) {
+            container.innerHTML = `<p class="text-center text-[10px] font-bold text-slate-400 uppercase py-10 italic">Nenhuma movimentação neste período</p>`;
+            return;
+        }
+
+        let listaTotal = [
+            ...vendas.map(v => ({ data: v.created_at, desc: `VENDA #${v.id}`, valor: v.total, tipo: 'E', cat: v.forma_pagamento })),
+            ...movs.map(m => ({ data: m.created_at, desc: m.motivo || m.tipo, valor: m.valor, tipo: m.tipo === 'SUPRIMENTO' ? 'E' : 'S', cat: 'CAIXA' })),
+            ...despesas.map(d => ({ data: d.data_pagamento, desc: d.descricao, valor: d.valor, tipo: 'S', cat: d.categoria }))
+        ].sort((a, b) => new Date(b.data) - new Date(a.data));
+
+        container.innerHTML = listaTotal.map(item => `
+            <div class="flex justify-between items-center bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                <div class="flex flex-col">
+                    <span class="text-[9px] font-black text-slate-700 dark:text-slate-200 uppercase">${item.desc}</span>
+                    <span class="text-[7px] font-bold text-slate-400 uppercase italic">${new Date(item.data).toLocaleDateString('pt-BR')} • ${item.cat}</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-[10px] font-black ${item.tipo === 'E' ? 'text-emerald-500' : 'text-red-500'}">
+                        ${item.tipo === 'E' ? '+' : '-'} R$ ${parseFloat(item.valor).toFixed(2).replace('.', ',')}
+                    </span>
+                </div>
+            </div>
+        `).join('');
+
+    } catch (e) {
+        console.error("Erro Fluxo:", e);
+        container.innerHTML = `<p class="text-red-500 text-[10px] text-center font-black uppercase mt-4">Erro ao carregar dados</p>`;
+    }
+};
+
+window.detalharEntradasFluxo = function() {
+    const vendas = window.dadosFluxoAtual.entradas;
+    let mesaTotal = 0, balcaoTotal = 0;
+    const pagamentos = {};
+
+    vendas.forEach(v => {
+        const val = parseFloat(v.total || 0);
+        if (v.comanda_id) mesaTotal += val;
+        else balcaoTotal += val;
+
+        const pg = (v.forma_pagamento || 'OUTROS').toUpperCase();
+        pagamentos[pg] = (pagamentos[pg] || 0) + val;
+    });
+
+    let html = `
+        <div class="space-y-2">
+            <div class="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                <span class="text-[10px] font-black text-slate-500 uppercase flex items-center gap-1"><i data-lucide="clipboard-list" class="w-3.5 h-3.5" aria-hidden="true"></i> Vendas Comanda</span>
+                <span class="text-xs font-black text-slate-700 dark:text-slate-200">R$ ${mesaTotal.toFixed(2).replace('.', ',')}</span>
+            </div>
+            <div class="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                <span class="text-[10px] font-black text-slate-500 uppercase flex items-center gap-1"><i data-lucide="shopping-bag" class="w-3.5 h-3.5" aria-hidden="true"></i> Vendas Balcão</span>
+                <span class="text-xs font-black text-slate-700 dark:text-slate-200">R$ ${balcaoTotal.toFixed(2).replace('.', ',')}</span>
+            </div>
+        </div>
+        <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <h4 class="text-[9px] font-black text-slate-400 uppercase mb-3 tracking-widest italic">Por Forma de Pagamento</h4>
+            <div class="space-y-2">
+                ${Object.entries(pagamentos).map(([pg, val]) => {
+                    // MÁGICA ACONTECENDO AQUI: Puxando sua função de cores!
+                    const classesCor = typeof window.obterEstiloPilaPagamento === 'function' 
+                                       ? window.obterEstiloPilaPagamento(pg) 
+                                       : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300';
+                    return `
+                    <div class="flex justify-between items-center py-2 px-3 rounded-xl ${classesCor}">
+                        <span class="text-[9px] font-bold uppercase">${pg}</span>
+                        <span class="text-[10px] font-black">R$ ${val.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                `}).join('')}
+            </div>
+        </div>
+    `;
+
+    document.getElementById('detalhe-fluxo-titulo').innerText = "RESUMO DE ENTRADAS";
+    document.getElementById('detalhe-fluxo-conteudo').innerHTML = html;
+    document.getElementById('modal-detalhe-fluxo').classList.remove('hidden');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+};
+
+window.detalharSaidasFluxo = function() {
+    const saidas = window.dadosFluxoAtual.saidas;
+    
+    if (saidas.length === 0) {
+        document.getElementById('detalhe-fluxo-conteudo').innerHTML = `<p class="text-center py-10 text-[10px] uppercase font-bold text-slate-400">Sem saídas no período</p>`;
+    } else {
+        let html = saidas.map(s => `
+            <div class="flex justify-between items-center p-3 bg-red-50/50 dark:bg-red-900/10 rounded-xl border border-red-100/50 dark:border-red-900/20 mb-2">
+                <div class="flex flex-col">
+                    <span class="text-[9px] font-black text-slate-700 dark:text-slate-200 uppercase">${s.desc}</span>
+                    <span class="text-[7px] font-bold text-slate-400 uppercase">${s.cat}</span>
+                </div>
+                <span class="text-[10px] font-black text-red-500">- R$ ${parseFloat(s.valor).toFixed(2).replace('.', ',')}</span>
+            </div>
+        `).join('');
+        document.getElementById('detalhe-fluxo-conteudo').innerHTML = `<div class="space-y-1">${html}</div>`;
+    }
+
+    document.getElementById('detalhe-fluxo-titulo').innerText = "LISTAGEM DE SAÍDAS";
+    document.getElementById('modal-detalhe-fluxo').classList.remove('hidden');
+};
