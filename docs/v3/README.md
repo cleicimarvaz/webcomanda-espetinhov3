@@ -12,11 +12,27 @@ Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica d
 
 ## Estrutura
 
-- `auditoria/` — estado atual, arquitetura, banco, segurança e pontos de atenção.
+- `auditoria/` — estado atual, arquitetura, banco, segurança, funcionalidades e pontos de atenção.
 - `produto/` — visão e requisitos da V3.
 - `arquitetura/` — arquitetura e integrações futuras.
 - `roadmap/` — fases de desenvolvimento e backlog.
 - `decisoes/` — decisões técnicas e de produto.
+
+## Documentos já consolidados
+
+### Auditoria
+
+- [Visão geral](auditoria/visao-geral.md)
+- [Arquitetura atual](auditoria/arquitetura-atual.md)
+- [Funcionalidades existentes](auditoria/funcionalidades-existentes.md)
+- [Banco de dados](auditoria/banco-de-dados.md)
+- [Uso do banco pelo código](auditoria/uso-do-banco-pelo-codigo.md)
+- [Segurança](auditoria/seguranca.md)
+- [Pontos de atenção](auditoria/pontos-de-atencao.md)
+
+### Arquitetura
+
+- [Módulos e dependências](arquitetura/modulos.md)
 
 ## Base analisada
 
