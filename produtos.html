@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Produtos | Espetinho & Cia</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/jpeg" href="img/logo.jpg?v=3">
+    <meta name="theme-color" content="#e63946">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Espetinho & Cia">
+    <link rel="apple-touch-icon" href="img/logo.jpg?v=3">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: {} }
+        }
+
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
+    <style>
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+    </style>
+</head>
+<body class="p-6 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300 select-none" style="display: none;">
+
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 sticky top-0 z-50 shadow-sm -mx-6 -mt-6 mb-6 px-6">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-black uppercase tracking-tighter">
+                <span class="text-emerald-500">Gestão</span> Produtos
+            </h1>
+            <button onclick="window.location.href='configuracoes.html'" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 px-4 py-2 rounded-lg uppercase tracking-widest transition-colors">
+                Voltar
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto animate-fade-in">
+
+        <div id="secao-produtos" class="w-full max-w-4xl mx-auto space-y-4">
+            <div class="flex flex-wrap sm:flex-nowrap bg-white dark:bg-slate-900 p-1 rounded-3xl sm:rounded-full shadow-sm border border-slate-100 dark:border-slate-800 mb-4 gap-1">
+                <button id="btn-aba-lista" onclick="alternarAbasAdminProdutos('lista')" class="flex-1 min-w-[30%] py-3 rounded-full bg-[#e63946] text-white text-[9px] font-black uppercase transition-all font-sans italic tracking-widest shadow-sm">LISTA</button>
+                <button id="btn-aba-estoque" onclick="alternarAbasAdminProdutos('estoque')" class="flex-1 min-w-[30%] py-3 rounded-full bg-transparent text-slate-400 dark:text-slate-500 text-[9px] font-black uppercase transition-all font-sans italic tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800">ESTOQUE</button>
+                <button id="btn-aba-cadastro" onclick="alternarAbasAdminProdutos('cadastro')" class="flex-1 min-w-[30%] py-3 rounded-full bg-transparent text-slate-400 dark:text-slate-500 text-[9px] font-black uppercase transition-all font-sans italic tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800">NOVO</button>
+            </div>
+
+            <div id="aba-lista" class="pb-20 space-y-4 w-full">
+                <div class="flex gap-2">
+                    <button onclick="window.abrirImportacaoProdutos()" class="flex-1 flex items-center justify-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 py-3 rounded-2xl text-[9px] font-black uppercase italic tracking-widest shadow-sm active:scale-95 transition-all">
+                        <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5" aria-hidden="true"></i> Importar Planilha
+                    </button>
+                </div>
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 space-y-3">
+                    <div>
+                        <label for="filtro-pesquisa-catalogo" class="block text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase italic mb-1 ml-2">Pesquisar Produto</label>
+                        <div class="relative">
+                            <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"></i>
+                            <input type="text" id="filtro-pesquisa-catalogo" oninput="renderizarCatalogo()" placeholder="EX: ESPETINHO DE CARNE..." class="w-full bg-slate-50 dark:bg-slate-800 pl-10 pr-4 py-3 rounded-xl text-[11px] font-bold text-slate-700 dark:text-slate-200 border-2 border-slate-100 dark:border-slate-700 outline-none uppercase focus:border-red-100 dark:focus:border-red-900 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600">
+                        </div>
+                    </div>
+                    <div class="flex gap-2 items-end">
+                        <div class="flex-1">
+                            <label for="ordem-catalogo" class="block text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase italic mb-1 ml-2">Organizar por</label>
+                            <select id="ordem-catalogo" onchange="renderizarCatalogo()" class="w-full bg-slate-50 dark:bg-slate-800 p-3 rounded-xl text-[11px] font-bold text-slate-700 dark:text-slate-200 border-2 border-slate-100 dark:border-slate-700 outline-none uppercase appearance-none cursor-pointer">
+                                <option value="nome-asc">NOME (A-Z)</option>
+                                <option value="nome-desc">NOME (Z-A)</option>
+                                <option value="preco-asc">MENOR PREÇO</option>
+                                <option value="preco-desc">MAIOR PREÇO</option>
+                                <option value="categoria">CATEGORIA</option>
+                            </select>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border-2 border-slate-100 dark:border-slate-700 flex items-center h-[46px]">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="filtro-ocultar-inativos" class="sr-only peer" onchange="renderizarCatalogo()" checked>
+                                <div class="w-9 h-5 bg-slate-300 dark:bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#e63946]"></div>
+                                <span class="ml-2 text-[8px] font-black text-slate-500 dark:text-slate-400 uppercase italic whitespace-nowrap">Ativos</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div id="lista-catalogo" class="space-y-2"></div>
+            </div>
+
+            <div id="aba-estoque" class="hidden pb-20 space-y-4 w-full">
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-[2rem] border border-blue-100 dark:border-blue-800/50 flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="font-black text-blue-800 dark:text-blue-400 uppercase italic">Inventário</h3>
+                        <p class="text-[10px] text-blue-600 dark:text-blue-500 uppercase">Gerencie entradas e saídas</p>
+                    </div>
+                    <i data-lucide="package" class="w-8 h-8 text-blue-600 dark:text-blue-400"></i>
+                </div>
+                <div class="flex gap-2 mb-2">
+                    <button onclick="window.exportarInventarioParaExcel()" class="flex-1 flex items-center justify-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 py-3 rounded-2xl text-[9px] font-black uppercase italic tracking-widest shadow-sm active:scale-95 transition-all">
+                        <i data-lucide="download" class="w-3.5 h-3.5" aria-hidden="true"></i> Exportar Planilha
+                    </button>
+                    <button onclick="window.abrirImportacaoInventario()" class="flex-1 flex items-center justify-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 py-3 rounded-2xl text-[9px] font-black uppercase italic tracking-widest shadow-sm active:scale-95 transition-all">
+                        <i data-lucide="upload" class="w-3.5 h-3.5" aria-hidden="true"></i> Importar Contagem
+                    </button>
+                </div>
+                <div id="lista-estoque" class="space-y-2"></div>
+            </div>
+
+            <div id="aba-cadastro" class="hidden bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800 space-y-4 w-full">
+                <div>
+                    <label for="p-nome" class="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase italic mb-1 ml-2">Nome do Produto</label>
+                    <input type="text" id="p-nome" class="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 border-2 border-slate-100 dark:border-slate-700 outline-none uppercase">
+                </div>
+
+                <div>
+                    <label for="p-observacao" class="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase italic mb-1 ml-2">Observação (Exibe no Cardápio)</label>
+                    <input type="text" id="p-observacao" placeholder="Ex: Coca cola, Coca zero, Guaraná..." class="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 border-2 border-slate-100 dark:border-slate-700 outline-none uppercase">
+                </div>
+
+                <div>
+                    <label for="p-foto" class="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase italic mb-1 ml-2">Foto do Produto</label>
+                    <div class="flex items-center gap-3">
+                        <div id="preview-foto-produto" class="w-16 h-16 shrink-0 bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-slate-100 dark:border-slate-700 flex items-center justify-center overflow-hidden">
+                            <i data-lucide="image" class="w-6 h-6 text-slate-300"></i>
+                        </div>
+                        <input type="file" id="p-foto" accept="image/*" onchange="window.preverFotoProduto(event)" class="flex-1 min-w-0 text-xs font-bold text-slate-600 dark:text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-emerald-500 file:text-white hover:file:bg-emerald-600 cursor-pointer">
+                    </div>
+                    <input type="hidden" id="p-foto-url">
+                </div>
+
+                <div>
+                    <label for="p-galeria" class="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase italic mb-1 ml-2">Fotos Extras (Galeria do Cardápio)</label>
+                    <div id="preview-galeria-produto" class="flex flex-wrap gap-2 mb-2"></div>
+                    <input type="file" id="p-galeria" accept="image/*" multiple onchange="window.adicionarFotosGaleriaProduto(event)" class="w-full text-xs font-bold text-slate-600 dark:text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-emerald-500 file:text-white hover:file:bg-emerald-600 cursor-pointer">
+                    <input type="hidden" id="p-galeria-urls">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="p-categoria" class="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase italic mb-1 ml-2">Categoria</label>
+                        <input type="text" id="p-categoria" list="lista-categorias-produto" onchange="atualizarToggleCozinha(); window.toggleEditorComposicaoCombo()" placeholder="EX: ESPETOS, SOBREMESAS..." class="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 border-2 border-slate-100 dark:border-slate-700 outline-none uppercase">
+                        <datalist id="lista-categorias-produto"></datalist>
+                        <p class="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase mt-1 ml-2">Escolha uma existente ou digite uma nova</p>
+                    </div>
+                    <div>
+                        <label for="p-preco" class="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase italic mb-1 ml-2">Preço de Venda (R$)</label>
+                        <input type="tel" id="p-preco" inputmode="decimal" oninput="mascaraMoeda(event)" placeholder="0,00" class="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 border-2 border-slate-100 dark:border-slate-700 outline-none text-center">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="p-custo" class="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase italic mb-1 ml-2">Preço de Custo (R$)</label>
+                        <input type="tel" id="p-custo" inputmode="decimal" oninput="mascaraMoeda(event)" placeholder="0,00" class="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 border-2 border-slate-100 dark:border-slate-700 outline-none text-center">
+                    </div>
+                    <div>
+                        <label for="p-codigo-barras" class="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase italic mb-1 ml-2">SKU / Código de Barras</label>
+                        <input type="text" id="p-codigo-barras" placeholder="Opcional" class="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 border-2 border-slate-100 dark:border-slate-700 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="p-fornecedor" class="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase italic mb-1 ml-2">Fornecedor (opcional)</label>
+                    <select id="p-fornecedor" class="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 border-2 border-slate-100 dark:border-slate-700 outline-none uppercase">
+                        <option value="">Sem fornecedor</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="p-ingredientes" class="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase italic mb-1 ml-2">Ingredientes (Separados por vírgula)</label>
+                    <input type="text" id="p-ingredientes" placeholder="Ex: Arroz, Farofa, Vinagrete" class="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 border-2 border-slate-100 dark:border-slate-700 outline-none uppercase">
+                    <p class="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase mt-1 ml-2 leading-none tracking-tighter">Ideal para Refeições. Exibe opções na venda.</p>
+                </div>
+
+                <div id="container-composicao-combo" class="hidden bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700 mt-2">
+                    <label class="block text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase italic leading-none mb-1">Composição do Combo</label>
+                    <p class="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-3 leading-none tracking-tighter">Produtos que serão baixados do estoque quando este combo for vendido</p>
+                    <p class="text-[8px] font-bold text-amber-500 uppercase mb-3 leading-none tracking-tighter">Salve o combo antes de adicionar componentes</p>
+
+                    <div id="lista-composicao-combo" class="mb-3"></div>
+
+                    <div class="flex gap-2">
+                        <select id="select-componente-combo" class="flex-[2] min-w-0 bg-white dark:bg-slate-900 p-3 rounded-xl text-[10px] font-bold text-slate-700 dark:text-slate-200 border-2 border-slate-100 dark:border-slate-700 outline-none uppercase"></select>
+                        <input type="number" id="input-qtd-componente-combo" min="0.01" step="0.01" value="1" class="w-16 shrink-0 bg-white dark:bg-slate-900 p-3 rounded-xl text-[10px] font-bold text-slate-700 dark:text-slate-200 border-2 border-slate-100 dark:border-slate-700 outline-none text-center">
+                        <button type="button" onclick="window.adicionarComponenteCombo()" aria-label="Adicionar componente" class="shrink-0 w-11 h-11 bg-emerald-500 text-white rounded-xl flex items-center justify-center active:scale-95 transition-all"><i data-lucide="plus" class="w-4 h-4" aria-hidden="true"></i></button>
+                    </div>
+                </div>
+
+                <div id="container-toggle-preparo" class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700 flex items-center justify-between mt-2">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase italic leading-none">Enviar p/ Produção?</label>
+                        <p class="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase mt-1 leading-none tracking-tighter">Aparece na tela da churrasqueira</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="p-preparo" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-slate-300 dark:bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                    </label>
+                </div>
+
+                <div id="container-toggle-estoque" class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700 mt-2">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase italic leading-none">Controlar Estoque?</label>
+                            <p class="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase mt-1 leading-none tracking-tighter">Exige inventário para este item</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="p-controla-estoque" onchange="window.toggleEstoqueMinimo()" class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-300 dark:bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                        </label>
+                    </div>
+                    <div id="container-estoque-minimo" class="hidden mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+                        <label for="p-estoque-minimo" class="block text-[9px] font-black text-slate-400 uppercase italic mb-1 ml-1">Estoque Mínimo (alerta de baixo estoque)</label>
+                        <input type="number" id="p-estoque-minimo" min="0" placeholder="Ex: 5" class="w-full bg-white dark:bg-slate-900 p-3 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 border-2 border-slate-100 dark:border-slate-700 outline-none">
+                    </div>
+                </div>
+
+                <div id="container-toggle-complementos" class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700 flex items-center justify-between mt-2">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase italic leading-none">Pedir Complementos?</label>
+                        <p class="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase mt-1 leading-none tracking-tighter">Desmarque para vendas rápidas/ticket</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="p-pedir-complementos" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-slate-300 dark:bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
+                    </label>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button onclick="cancelarEdicao()" class="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 py-4 rounded-xl text-[10px] font-black uppercase active:scale-95 transition-all">Cancelar</button>
+                    <button id="btn-salvar-produto" onclick="salvarProduto()" class="flex-[2] flex items-center justify-center gap-2 bg-emerald-500 text-white py-4 rounded-xl text-[10px] font-black uppercase shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20 active:scale-95 transition-all">SALVAR PRODUTO</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="modal-importacao-produtos" class="hidden fixed inset-0 bg-slate-900/80 z-[110] justify-center items-center p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-[2rem] w-full max-w-lg p-6 shadow-2xl relative border border-slate-100 dark:border-slate-800 flex flex-col max-h-[85vh]">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-sm font-black text-slate-800 dark:text-slate-200 uppercase italic flex items-center gap-1.5"><i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Importar Produtos</h3>
+                <button onclick="window.fecharImportacaoProdutos()" aria-label="Fechar" class="w-9 h-9 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 font-bold active:scale-90 transition-transform flex items-center justify-center"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+
+            <div id="passo-selecao-importacao">
+                <p class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-3 leading-tight tracking-tighter">Envie uma planilha .xlsx com as colunas: nome, categoria, preco. Opcionais: preco_custo, estoque_minimo, codigo_barras.</p>
+                <button onclick="window.baixarModeloImportacaoProdutos()" class="w-full flex items-center justify-center gap-1.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 py-3 rounded-xl text-[9px] font-black uppercase italic tracking-widest mb-3 active:scale-95 transition-all">
+                    <i data-lucide="download" class="w-3.5 h-3.5" aria-hidden="true"></i> Baixar Modelo (.xlsx)
+                </button>
+                <label class="w-full flex items-center justify-center gap-1.5 bg-emerald-500 text-white py-4 rounded-xl text-[10px] font-black uppercase italic tracking-widest cursor-pointer active:scale-95 transition-all">
+                    <i data-lucide="upload" class="w-4 h-4" aria-hidden="true"></i> Escolher Arquivo
+                    <input type="file" id="input-arquivo-importacao" accept=".xlsx,.xls" class="hidden" onchange="window.handleArquivoImportacaoProdutos(event)">
+                </label>
+            </div>
+
+            <div id="passo-previa-importacao" class="hidden flex-1 min-h-0 flex flex-col">
+                <div id="resumo-previa-importacao" class="text-[9px] font-black uppercase italic tracking-widest mb-2"></div>
+                <div id="lista-previa-importacao" class="space-y-1.5 overflow-y-auto custom-scrollbar flex-1 pr-1 mb-4"></div>
+                <div class="flex gap-3">
+                    <button onclick="window.fecharImportacaoProdutos()" class="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 py-4 rounded-xl text-[10px] font-black uppercase active:scale-95 transition-all">Cancelar</button>
+                    <button id="btn-confirmar-importacao" onclick="window.confirmarImportacaoProdutos()" class="flex-[2] flex items-center justify-center gap-2 bg-emerald-500 text-white py-4 rounded-xl text-[10px] font-black uppercase shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20 active:scale-95 transition-all disabled:opacity-40 disabled:pointer-events-none">Confirmar Importação</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-importacao-inventario" class="hidden fixed inset-0 bg-slate-900/80 z-[110] justify-center items-center p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-[2rem] w-full max-w-lg p-6 shadow-2xl relative border border-slate-100 dark:border-slate-800 flex flex-col max-h-[85vh]">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-sm font-black text-slate-800 dark:text-slate-200 uppercase italic flex items-center gap-1.5"><i data-lucide="clipboard-list" class="w-4 h-4"></i> Importar Contagem</h3>
+                <button onclick="window.fecharImportacaoInventario()" aria-label="Fechar" class="w-9 h-9 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 font-bold active:scale-90 transition-transform flex items-center justify-center"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+
+            <div id="passo-selecao-inventario">
+                <p class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-3 leading-tight tracking-tighter">Exporte a planilha, preencha a coluna "contagem_fisica" com a quantidade contada e reenvie o mesmo arquivo aqui. O sistema calcula a diferença e ajusta o estoque.</p>
+                <label class="w-full flex items-center justify-center gap-1.5 bg-emerald-500 text-white py-4 rounded-xl text-[10px] font-black uppercase italic tracking-widest cursor-pointer active:scale-95 transition-all">
+                    <i data-lucide="upload" class="w-4 h-4" aria-hidden="true"></i> Escolher Arquivo
+                    <input type="file" id="input-arquivo-inventario" accept=".xlsx,.xls" class="hidden" onchange="window.handleArquivoImportacaoInventario(event)">
+                </label>
+            </div>
+
+            <div id="passo-previa-inventario" class="hidden flex-1 min-h-0 flex flex-col">
+                <div id="resumo-previa-inventario" class="text-[9px] font-black uppercase italic tracking-widest mb-2"></div>
+                <div id="lista-previa-inventario" class="space-y-1.5 overflow-y-auto custom-scrollbar flex-1 pr-1 mb-4"></div>
+                <div class="flex gap-3">
+                    <button onclick="window.fecharImportacaoInventario()" class="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 py-4 rounded-xl text-[10px] font-black uppercase active:scale-95 transition-all">Cancelar</button>
+                    <button id="btn-confirmar-inventario" onclick="window.confirmarImportacaoInventario()" class="flex-[2] flex items-center justify-center gap-2 bg-emerald-500 text-white py-4 rounded-xl text-[10px] font-black uppercase shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20 active:scale-95 transition-all disabled:opacity-40 disabled:pointer-events-none">Confirmar Inventário</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-historico-precos" class="hidden fixed inset-0 bg-slate-900/80 z-[110] justify-center items-center p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-[2rem] w-full max-w-md p-6 shadow-2xl relative border border-slate-100 dark:border-slate-800 flex flex-col max-h-[80vh]">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="titulo-historico-precos" class="text-sm font-black text-slate-800 dark:text-slate-200 uppercase italic flex items-center gap-1.5"><i data-lucide="history" class="w-4 h-4"></i> Histórico de Preço</h3>
+                <button onclick="window.fecharHistoricoPrecos()" aria-label="Fechar" class="w-9 h-9 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 font-bold active:scale-90 transition-transform flex items-center justify-center"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div id="lista-historico-precos" class="space-y-2 overflow-y-auto custom-scrollbar flex-1 pr-1"></div>
+        </div>
+    </div>
+
+    <div id="modal-movimentacao-estoque" class="hidden fixed inset-0 bg-slate-900/80 z-[110] justify-center items-center p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-[2rem] w-full max-w-sm p-6 shadow-2xl relative border border-slate-100 dark:border-slate-800">
+            <h3 id="titulo-movimentacao" class="text-lg font-black text-slate-800 dark:text-slate-200 uppercase italic mb-1">Ajustar Estoque</h3>
+            <p id="nome-produto-movimentacao" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-4">PRODUTO</p>
+            <input type="hidden" id="id-produto-movimentacao">
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Tipo de Movimento</label>
+                    <select id="tipo-movimentacao" class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold text-slate-700 dark:text-slate-200 outline-none focus:border-blue-500 dark:focus:border-blue-500">
+                        <option value="entrada">ENTRADA (Adicionar)</option>
+                        <option value="saida">SAÍDA (Baixa/Perda)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Quantidade</label>
+                    <input type="number" id="qtd-movimentacao" class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold text-slate-700 dark:text-slate-200 outline-none focus:border-blue-500 dark:focus:border-blue-500" placeholder="Ex: 10">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Motivo</label>
+                    <input type="text" id="motivo-movimentacao" class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold text-slate-700 dark:text-slate-200 outline-none focus:border-blue-500 dark:focus:border-blue-500" placeholder="Ex: Compra, Quebra, etc">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mt-6">
+                <button onclick="fecharModalEstoque()" class="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-black uppercase text-[10px] py-4 rounded-2xl active:scale-95 transition-all">Cancelar</button>
+                <button onclick="salvarMovimentacao()" id="btn-salvar-movimentacao" class="bg-emerald-500 text-white font-black uppercase text-[10px] py-4 rounded-2xl shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20 active:scale-95 transition-all">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-alerta-sistema" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[999] items-center justify-center px-6 transition-opacity">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-[320px] rounded-[3rem] p-8 text-center shadow-2xl border-4 border-white dark:border-slate-800 animate-slide-up">
+            <div class="bg-blue-50 dark:bg-blue-900/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-500 shadow-inner">
+                <i data-lucide="info" class="w-8 h-8"></i>
+            </div>
+            <h3 id="titulo-modal-alerta" class="text-blue-500 dark:text-blue-400 font-black text-sm uppercase mb-2 italic tracking-widest leading-none">Atenção</h3>
+            <p id="msg-modal-alerta" class="text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-6 uppercase tracking-tighter">Mensagem do sistema aqui.</p>
+
+            <button onclick="fecharAlertaSistema()" class="w-full bg-blue-500 text-white py-4 rounded-[1.5rem] text-[10px] font-black uppercase shadow-lg shadow-blue-200 dark:shadow-blue-900/30 active:scale-95 transition-all">
+                ENTENDI
+            </button>
+        </div>
+    </div>
+
+    <div id="modal-confirm-sistema" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[999] items-center justify-center px-6 transition-opacity">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-[320px] rounded-[3rem] p-8 text-center shadow-2xl border-4 border-white dark:border-slate-800 animate-slide-up">
+            <div class="bg-orange-50 dark:bg-orange-900/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-orange-500 shadow-inner">
+                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+            </div>
+            <h3 id="titulo-modal-confirm" class="text-orange-500 dark:text-orange-400 font-black text-sm uppercase mb-2 italic tracking-widest leading-none">Confirmar Ação</h3>
+            <p id="msg-modal-confirm" class="text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-8 uppercase tracking-tighter">Deseja realmente fazer isso?</p>
+
+            <div class="flex gap-3">
+                <button onclick="fecharConfirmSistema()" class="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 py-4 rounded-[1.5rem] text-[9px] font-black uppercase active:scale-95 transition-all">NÃO</button>
+                <button id="btn-executar-confirm" class="flex-1 bg-orange-500 text-white py-4 rounded-[1.5rem] text-[9px] font-black uppercase shadow-lg shadow-orange-200 dark:shadow-orange-900/30 active:scale-95 transition-all">SIM</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="componentes/config.js" defer></script>
+    <script src="componentes/database.js" defer></script>
+    <script src="componentes/utils.js" defer></script>
+    <script src="componentes/ui.js" defer></script>
+    <script src="componentes/fornecedores.js" defer></script>
+    <script src="componentes/produtos-combos.js" defer></script>
+    <script src="componentes/produtos-importacao.js" defer></script>
+    <script src="componentes/estoque-inventario.js" defer></script>
+    <script src="componentes/produtos.js" defer></script>
+    <script src="componentes/auth.js" defer></script>
+    <script src="componentes/main.js" defer></script>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+        window.addEventListener('load', () => {
+            if (typeof renderizarCatalogo === 'function') renderizarCatalogo();
+            if (typeof preencherSelectsFornecedor === 'function') preencherSelectsFornecedor(['p-fornecedor']);
+            if (typeof preencherDatalistCategorias === 'function') preencherDatalistCategorias();
+        });
+    </script>
+</body>
+</html>

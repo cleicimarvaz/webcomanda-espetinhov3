@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Scanner de Ingressos | Espetinho & Cia</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/jpeg" href="img/logo.jpg?v=3">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="img/logo.jpg?v=3">
+
+    <style>
+        #reader { border-radius: 1.5rem; overflow: hidden; }
+        #reader video { border-radius: 1.5rem; }
+        #reader__dashboard_section_csr button { display: none !important; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-slate-950 min-h-screen text-white select-none" style="display: none;">
+
+    <header class="p-4 flex justify-between items-center">
+        <button onclick="window.location.href='eventos.html'" class="text-xs font-bold bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg uppercase tracking-widest transition-colors">
+            Voltar
+        </button>
+        <h1 class="text-sm font-black uppercase tracking-widest flex items-center gap-1.5">
+            <i data-lucide="scan-line" class="w-4 h-4 text-emerald-400"></i> Scanner de Ingressos
+        </h1>
+        <span class="w-16"></span>
+    </header>
+
+    <main class="max-w-md mx-auto p-4 space-y-4">
+
+        <div id="container-leitor" class="relative">
+            <div id="reader" class="w-full bg-slate-900 border border-slate-800"></div>
+            <p class="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-3">Aponte a câmera para o QR Code do ingresso</p>
+        </div>
+
+        <div id="container-resultado" class="hidden animate-fade-in">
+            <div id="painel-resultado" class="rounded-[2rem] p-6 text-center border-4">
+                <i id="icone-resultado" data-lucide="check-circle-2" class="w-16 h-16 mx-auto mb-3"></i>
+                <h2 id="titulo-resultado" class="text-2xl font-black uppercase tracking-tighter">--</h2>
+                <p id="subtitulo-resultado" class="text-xs font-bold uppercase tracking-widest opacity-80 mt-1">--</p>
+
+                <div id="detalhes-resultado" class="mt-5 bg-black/20 rounded-2xl p-4 text-left space-y-1"></div>
+            </div>
+
+            <button onclick="window.escanearProximoIngresso()" class="w-full mt-4 bg-white text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2">
+                <i data-lucide="scan-line" class="w-5 h-5"></i> Escanear Próximo
+            </button>
+        </div>
+    </main>
+
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="componentes/config.js" defer></script>
+    <script src="componentes/database.js" defer></script>
+    <script src="componentes/ui.js" defer></script>
+    <script src="componentes/auth.js" defer></script>
+    <script src="componentes/main.js" defer></script>
+    <script src="componentes/scanner-ingressos.js" defer></script>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ingressos | Espetinho & Cia</title>
+
+    <link rel="icon" type="image/jpeg" href="img/logo.jpg?v=2">
+    <link rel="apple-touch-icon" href="img/logo.jpg?v=2">
+    <meta name="theme-color" content="#0f172a">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1/build/qrcode.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-slide-up { animation: slideUp 0.3s ease-out forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans p-4">
+
+    <div id="app" class="max-w-md mx-auto space-y-6 animate-fade-in">
+
+        <div id="evento-info" class="text-center">
+            <h1 id="ev-nome" class="text-2xl font-black uppercase tracking-tighter text-slate-900">Carregando...</h1>
+            <p id="ev-data" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1"></p>
+        </div>
+
+        <div id="container-solicitacao" class="hidden space-y-6">
+
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+                <h3 class="font-black text-slate-400 uppercase text-[10px] tracking-widest mb-4 border-b border-slate-100 pb-2 flex items-center gap-1.5">
+                    <i data-lucide="ticket" class="w-3.5 h-3.5"></i> Escolha o tipo de ingresso
+                </h3>
+                <div id="lista-tipos-publico" class="space-y-2">
+                    <p class="text-xs text-slate-400 italic">Carregando tipos de ingresso...</p>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Quantidade</span>
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="window.alterarQuantidadeIngresso(-1)" aria-label="Diminuir quantidade" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-black text-slate-600 active:scale-90 transition-all">
+                            <i data-lucide="minus" class="w-4 h-4"></i>
+                        </button>
+                        <span id="qtd-ingressos" class="text-lg font-black text-slate-800 w-6 text-center">1</span>
+                        <button type="button" onclick="window.alterarQuantidadeIngresso(1)" aria-label="Aumentar quantidade" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-black text-slate-600 active:scale-90 transition-all">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-4 bg-emerald-600 rounded-xl text-white text-center font-black shadow-lg shadow-emerald-600/20">
+                    TOTAL: R$ <span id="valor-total-ingressos">0,00</span>
+                </div>
+            </div>
+
+            <form id="form-ingresso-publico" class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 space-y-4">
+                <h3 class="font-black text-slate-800 uppercase text-[10px] tracking-widest">Seus Dados</h3>
+
+                <input type="text" id="cli-nome" required placeholder="Seu Nome Completo" class="w-full bg-slate-50 border border-slate-100 rounded-xl p-4 font-bold text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                <input type="tel" id="cli-tel" required placeholder="(00) 00000-0000" maxlength="15" oninput="window.mascaraTelefone && window.mascaraTelefone(this)" class="w-full bg-slate-50 border border-slate-100 rounded-xl p-4 font-bold text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+
+                <p class="text-[10px] font-bold text-amber-500 italic flex items-center gap-1">
+                    <i data-lucide="alert-triangle" class="w-3.5 h-3.5 shrink-0"></i> Seu(s) QR Code(s) já será(ão) gerado(s) agora. A confirmação do pagamento chega pelo WhatsApp.
+                </p>
+
+                <button type="submit" id="btn-enviar-ingresso" class="w-full bg-slate-900 hover:bg-black text-white font-black py-4 rounded-xl uppercase tracking-widest transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2">
+                    <i data-lucide="check-circle" class="w-5 h-5"></i> SOLICITAR INGRESSO
+                </button>
+            </form>
+        </div>
+
+        <div id="container-sem-ingressos" class="hidden bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 text-center">
+            <i data-lucide="ticket-x" class="w-10 h-10 text-slate-300 mx-auto mb-3"></i>
+            <p class="text-sm font-bold text-slate-500">Nenhum tipo de ingresso disponível para este evento no momento.</p>
+        </div>
+
+        <div id="container-confirmacao" class="hidden space-y-4 animate-fade-in">
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-emerald-100 text-center">
+                <i data-lucide="check-circle-2" class="w-10 h-10 text-emerald-500 mx-auto mb-2"></i>
+                <h3 class="font-black text-slate-800 uppercase text-sm tracking-tight">Solicitação enviada!</h3>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 leading-relaxed">
+                    Guarde seu(s) QR Code(s). Assim que o pagamento for confirmado pelo WhatsApp, seu ingresso será liberado para entrada.
+                </p>
+            </div>
+
+            <div id="lista-qrcodes-gerados" class="space-y-3"></div>
+
+            <button type="button" onclick="window.reiniciarSolicitacaoIngresso()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-black py-4 rounded-xl uppercase tracking-widest text-[10px] transition-all active:scale-95 flex items-center justify-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i> Fazer Nova Solicitação
+            </button>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+
+    <!-- Scripts com atributo defer -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="componentes/config.js" defer></script>
+    <script src="componentes/database.js" defer></script>
+    <script src="componentes/ui.js" defer></script>
+    <script src="componentes/audit.js" defer></script>
+    <script src="componentes/ingresso-publico.js" defer></script>
+
+    <!-- Inicialização dos ícones -->
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

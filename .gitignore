@@ -1,0 +1,5 @@
+arq/db.txt
+arq/servidor-impressao/*.exe
+arq/servidor-impressao/build/
+arq/servidor-impressao/dist/
+arq/servidor-impressao/__pycache__/
