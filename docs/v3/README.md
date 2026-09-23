@@ -43,6 +43,7 @@ Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica d
 - [Papéis e permissões](arquitetura/permissoes.md)
 - [Modelo relacional organizacional](arquitetura/modelo-relacional-organizacional.md)
 - [Estratégia de RLS](arquitetura/estrategia-rls.md)
+- [Mapeamento de chaves organizacionais](arquitetura/mapeamento-chaves-organizacionais.md)
 
 ### Roadmap
 
