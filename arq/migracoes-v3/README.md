@@ -42,3 +42,11 @@ Cria a empresa/unidade inicial quando necessário, cria papéis de compatibilida
 Ela não migra autenticação, não adiciona contexto às tabelas operacionais e não ativa RLS.
 
 Documentação: `docs/v3/arquitetura/migration-002-backfill-organizacional.md`.
+
+### 003 — Contexto empresarial de fornecedores
+
+`003-contexto-empresarial-fornecedores.sql`
+
+Adiciona `empresa_id` a `fornecedores`, realiza o backfill da empresa inicial e torna o vínculo obrigatório. Não ativa RLS nem altera a lógica da aplicação.
+
+Documentação: `docs/v3/arquitetura/migration-003-fornecedores-empresa.md`.
