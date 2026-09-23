@@ -41,6 +41,8 @@ Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica d
 - [Arquitetura de dados alvo](arquitetura/banco-de-dados.md)
 - [Modelo organizacional](arquitetura/modelo-organizacional.md)
 - [Papéis e permissões](arquitetura/permissoes.md)
+- [Modelo relacional organizacional](arquitetura/modelo-relacional-organizacional.md)
+- [Estratégia de RLS](arquitetura/estrategia-rls.md)
 
 ### Roadmap
 
@@ -52,6 +54,7 @@ Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica d
 
 - [Registro de decisões](decisoes/README.md)
 - [ADR-001 — Modelo organizacional](decisoes/ADR-001-modelo-organizacional.md)
+- [ADR-002 — Modelo relacional organizacional](decisoes/ADR-002-modelo-relacional-organizacional.md)
 
 ## Base analisada
 
