@@ -29,6 +29,10 @@ Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica d
 - [Uso do banco pelo código](auditoria/uso-do-banco-pelo-codigo.md)
 - [Segurança](auditoria/seguranca.md)
 - [Pontos de atenção](auditoria/pontos-de-atencao.md)
+- [PWA e operação offline](auditoria/pwa-offline.md)
+- [Impressão](auditoria/impressao.md)
+- [Backup e recuperação](auditoria/backup-recuperacao.md)
+- [Integrações](auditoria/integracoes.md)
 
 ### Arquitetura
 
