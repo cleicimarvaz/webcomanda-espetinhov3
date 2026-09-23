@@ -39,6 +39,8 @@ Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica d
 - [Arquitetura alvo da V3](arquitetura/arquitetura-v3.md)
 - [Módulos e dependências](arquitetura/modulos.md)
 - [Arquitetura de dados alvo](arquitetura/banco-de-dados.md)
+- [Modelo organizacional](arquitetura/modelo-organizacional.md)
+- [Papéis e permissões](arquitetura/permissoes.md)
 
 ### Roadmap
 
@@ -49,6 +51,7 @@ Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica d
 ### Decisões
 
 - [Registro de decisões](decisoes/README.md)
+- [ADR-001 — Modelo organizacional](decisoes/ADR-001-modelo-organizacional.md)
 
 ## Base analisada
 
