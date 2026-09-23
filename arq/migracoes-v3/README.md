@@ -50,3 +50,19 @@ Documentação: `docs/v3/arquitetura/migration-002-backfill-organizacional.md`.
 Adiciona `empresa_id` a `fornecedores`, realiza o backfill da empresa inicial e torna o vínculo obrigatório. Não ativa RLS nem altera a lógica da aplicação.
 
 Documentação: `docs/v3/arquitetura/migration-003-fornecedores-empresa.md`.
+
+### 004 — Contexto empresarial de clientes
+
+`004-contexto-empresarial-clientes.sql`
+
+Adiciona `empresa_id` a `clientes`, realiza o backfill da empresa inicial e mantém os relacionamentos atuais com vendas e contas a receber.
+
+Documentação: `docs/v3/arquitetura/migration-004-clientes-empresa.md`.
+
+### 005 — Estoque por unidade
+
+`005-estoque-por-unidade.sql`
+
+Adiciona `empresa_id` a `produtos`, cria `estoque_produto_unidade` e adiciona `unidade_id` às movimentações, mantendo `produtos.estoque_atual` para compatibilidade durante a transição.
+
+Documentação: `docs/v3/arquitetura/migration-005-estoque-por-unidade.md`.
