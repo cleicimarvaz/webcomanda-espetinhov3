@@ -10,6 +10,8 @@ Definir entidades e relações:
 
 `empresa` → `unidade` → `usuário/perfil` → `dados operacionais`.
 
+Foi criado o [mapa organizacional das tabelas](../arquitetura/mapeamento-organizacional-tabelas.md), com a classificação inicial das 21 tabelas e os pontos que ainda dependem de decisão.
+
 Precisamos decidir quais dados são globais à empresa e quais pertencem a uma unidade.
 
 ## 2. Identidade
