@@ -36,7 +36,9 @@ Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica d
 
 ### Arquitetura
 
+- [Arquitetura alvo da V3](arquitetura/arquitetura-v3.md)
 - [Módulos e dependências](arquitetura/modulos.md)
+- [Arquitetura de dados alvo](arquitetura/banco-de-dados.md)
 
 ## Base analisada
 
