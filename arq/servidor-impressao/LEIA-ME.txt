@@ -1,0 +1,12 @@
+=== Arquivos de Compilação WebComanda ===
+
+Como você apagou os arquivos acidentalmente, aqui estão eles prontos para você gerar o seu novo executável (.exe):
+
+1. Extraia todos os arquivos desta pasta ZIP em um local no seu computador (por exemplo: C:\WebComanda_Build).
+2. Abra o terminal (Prompt de Comando ou PowerShell) dentro dessa pasta.
+3. Se o seu ambiente Python foi resetado ou mudou de máquina, instale as dependências rodando:
+   pip install -r requirements.txt
+4. Execute o script de compilação:
+   python build.py
+
+O novo executável (.exe) corrigido e pronto para uso aparecerá dentro da pasta 'dist'!

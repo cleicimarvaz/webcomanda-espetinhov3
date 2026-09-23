@@ -1,0 +1,4 @@
+supabase
+python-escpos
+pywin32
+pyinstaller
