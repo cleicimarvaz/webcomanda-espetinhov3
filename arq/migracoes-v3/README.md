@@ -32,3 +32,13 @@ Cria:
 Ela não ativa RLS, não migra usuários e não altera o fluxo atual de autenticação.
 
 Documentação: `docs/v3/arquitetura/migration-001-fundacao-organizacional.md`.
+
+### 002 — Backfill organizacional inicial
+
+`002-backfill-organizacional-inicial.sql`
+
+Cria a empresa/unidade inicial quando necessário, cria papéis de compatibilidade e vincula os usuários atuais.
+
+Ela não migra autenticação, não adiciona contexto às tabelas operacionais e não ativa RLS.
+
+Documentação: `docs/v3/arquitetura/migration-002-backfill-organizacional.md`.
