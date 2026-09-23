@@ -57,6 +57,7 @@ Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica d
 - [ADR-001 — Modelo organizacional](decisoes/ADR-001-modelo-organizacional.md)
 - [ADR-002 — Modelo relacional organizacional](decisoes/ADR-002-modelo-relacional-organizacional.md)
 - [Decisões de negócio pendentes](decisoes/decisoes-pendentes-negocio.md)
+- [Migration 002 — Backfill organizacional](arquitetura/migration-002-backfill-organizacional.md)
 
 ## Base analisada
 
