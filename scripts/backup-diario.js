@@ -1,9 +1,12 @@
-// Script de backup automático diário, rodado pelo GitHub Actions
-// (.github/workflows/backup-diario.yml) — sem dependências externas,
-// usa apenas o fetch nativo do Node 18+.
+// Script de backup automático diário, rodado pelo GitHub Actions.
+// As credenciais são fornecidas por variáveis de ambiente/Secrets do GitHub.
 
-const SUPABASE_URL = 'https://quqgblbqrrgmuhrlhuov.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_RYMiDWQnmd2umN8w2bdI5A_xz0elzVk';
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+    throw new Error('SUPABASE_URL e SUPABASE_KEY precisam estar configuradas no ambiente.');
+}
 
 const TABELAS_BACKUP = [
     'usuarios',
