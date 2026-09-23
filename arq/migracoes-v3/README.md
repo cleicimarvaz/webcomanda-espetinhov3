@@ -74,3 +74,13 @@ Documentação: `docs/v3/arquitetura/migration-005-estoque-por-unidade.md`.
 Adiciona `unidade_id` e referências relacionais ao domínio de inventário/movimentações, preservando os campos textuais legados e validando compatibilidade entre empresa do produto e empresa da unidade.
 
 Documentação: `docs/v3/arquitetura/migration-006-contexto-inventario-estoque.md`.
+
+### 007 — Baixa de estoque transacional
+
+`007-baixa-estoque-transacional.sql`
+
+Cria a RPC `registrar_baixa_estoque_v3`, com operação por unidade, bloqueio da posição, atualização de saldo e registro da movimentação dentro da mesma transação. Também adiciona `operacao_id` para idempotência.
+
+A V2 ainda não chama a RPC.
+
+Documentação: `docs/v3/arquitetura/migration-007-baixa-estoque-transacional.md`.
