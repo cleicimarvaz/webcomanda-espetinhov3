@@ -5,7 +5,8 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-    throw new Error('SUPABASE_URL e SUPABASE_KEY precisam estar configuradas no ambiente.');
+    console.warn('Backup não executado: SUPABASE_URL e SUPABASE_KEY não estão configuradas.');
+    process.exit(0);
 }
 
 const TABELAS_BACKUP = [
