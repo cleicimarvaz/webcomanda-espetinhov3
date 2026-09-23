@@ -2,98 +2,119 @@
 
 ## 1. Modelo atual
 
-O schema da V2 concentra usuários, auditoria, produtos/estoque, vendas/comandas, caixa, financeiro, eventos e ingressos em um único banco Supabase.
+O schema da V2 possui 21 tabelas de aplicação no schema public:
 
-Há relacionamentos por foreign key em várias áreas, mas a identificação do usuário em muitos registros ainda é feita por texto, por exemplo `usuario`, `vendedor`, `atendente` e `criado_por`.
+**Identidade/auditoria:** usuarios, auditoria  
+**Cadastros:** fornecedores, clientes, produtos, complementos  
+**Estoque:** produto_composicao, historico_precos, inventarios, estoque_movimentacoes  
+**Vendas/atendimento:** caixa, movimentacoes_caixa, comandas, historico_vendas  
+**Financeiro:** despesas, contas_receber, metas_faturamento  
+**Configuração:** configuracoes_sistema  
+**Eventos:** eventos, reservas_evento, tipos_ingresso, ingressos
 
-Isso dificulta rastreabilidade e integridade quando um usuário é renomeado, desativado ou removido.
+## 2. PKs e FKs
 
-## 2. RLS
+- usuarios: PK id
+- auditoria: PK id
+- fornecedores: PK id
+- clientes: PK id
+- produtos: PK id; FK fornecedor_id -> fornecedores.id
+- produto_composicao: PK id; FKs combo_id e componente_id -> produtos.id
+- historico_precos: PK id; FK produto_id -> produtos.id
+- inventarios: PK id
+- estoque_movimentacoes: PK id; FKs produto_id -> produtos.id e inventario_id -> inventarios.id
+- complementos: PK id UUID
+- caixa: PK id
+- movimentacoes_caixa: PK id; FK id_caixa -> caixa.id
+- comandas: PK id
+- historico_vendas: PK id; FKs comanda_id -> comandas.id, cliente_id -> clientes.id e id_caixa -> caixa.id
+- despesas: PK id; FK fornecedor_id -> fornecedores.id
+- contas_receber: PK id; FKs cliente_id -> clientes.id e venda_id -> historico_vendas.id
+- metas_faturamento: PK id
+- configuracoes_sistema: PK id
+- eventos: PK id UUID
+- reservas_evento: PK id UUID; FK evento_id -> eventos.id
+- tipos_ingresso: PK id UUID; FK evento_id -> eventos.id
+- ingressos: PK id UUID; FKs evento_id -> eventos.id e tipo_ingresso_id -> tipos_ingresso.id
 
-O próprio `schema-completo-novo-banco.sql` documenta que o RLS das tabelas públicas é desligado para reproduzir o comportamento da produção.
+## 3. Relacionamentos
 
-Esse é um achado confirmado e de prioridade crítica.
+- fornecedores 1:N produtos
+- fornecedores 1:N despesas
+- produtos 1:N historico_precos
+- produtos 1:N estoque_movimentacoes
+- produtos 1:N produto_composicao, em dois papéis: combo e componente
+- inventarios 1:N estoque_movimentacoes
+- caixa 1:N movimentacoes_caixa
+- caixa 1:N historico_vendas
+- comandas 1:N historico_vendas
+- clientes 1:N historico_vendas
+- clientes 1:N contas_receber
+- historico_vendas 1:N contas_receber
+- eventos 1:N reservas_evento
+- eventos 1:N tipos_ingresso
+- eventos 1:N ingressos
+- tipos_ingresso 1:N ingressos
 
-Na arquitetura atual, o navegador possui a chave pública do Supabase e acessa as tabelas diretamente. Sem RLS adequado, a API não possui uma barreira de autorização suficiente entre o usuário do sistema e os dados.
+## 4. Pontos estruturais
 
-### Consequência para a V3
+### Identidade
 
-O desenho da V3 deve partir de:
+Grande parte das tabelas usa texto para identificar o operador, em vez de uma FK para usuarios.
 
-- Supabase Auth ou outro mecanismo de identidade real;
-- RLS habilitado;
-- políticas por usuário/empresa/unidade e função;
-- operações críticas protegidas no banco/backend;
-- frontend tratando permissão como experiência de interface, não como autoridade.
+Exemplos: usuario, vendedor, atendente, criado_por, cadastrado_por, autorizado_por, vendido_por e validado_por.
 
-## 3. Integridade financeira
+Na V3, esses campos devem ser avaliados para uso de user_id/created_by/updated_by/approved_by, preservando eventualmente o nome como snapshot histórico.
 
-O schema possui alguns `CHECK` úteis, por exemplo em contas a receber e composição de combos.
+### JSONB
 
-Porém ainda existem campos financeiros importantes com pouca proteção de domínio:
+Os itens de comandas e vendas ficam em JSONB.
 
-- preços;
-- estoque;
-- valores de caixa;
-- totais de venda;
-- descontos;
-- taxas;
-- movimentações.
+Isso facilita o frontend, mas reduz integridade referencial e dificulta consultas analíticas. Antes de substituir, precisamos cruzar o formato usado pelo código.
 
-A V3 deve definir quais regras precisam ser invariantes do banco, em vez de depender somente do JavaScript.
+### Legados
 
-## 4. Vendas e comandas
+- produtos.estoque é documentado como legado; estoque_atual é o campo utilizado atualmente.
+- configuracoes_sistema mistura chave/valor com campos específicos.
+- eventos.patrocinadores usa JSONB.
+- eventos.mapa_url pode conter URL ou dados antigos em base64.
 
-`comandas.itens` e `historico_vendas.itens` são armazenados como JSONB.
+### Tabelas sem FK de saída
 
-Isso facilita a evolução rápida do frontend, mas limita consultas analíticas e integridade relacional.
+Não possuem FK para outras tabelas: usuarios, auditoria, fornecedores, clientes, inventarios, complementos, caixa, comandas, metas_faturamento, configuracoes_sistema e eventos.
 
-Para a V3, não é obrigatório abandonar JSONB imediatamente. Primeiro devemos identificar quais informações precisam ser consultadas, auditadas ou agregadas com frequência.
+Isso é aceitável para algumas entidades raiz, mas deve ser confrontado com o código para detectar relacionamentos mantidos apenas por texto.
 
-Uma evolução possível é manter o snapshot JSONB da venda e acrescentar tabelas normalizadas para itens de venda/comanda.
+## 5. RLS e Storage
 
-## 5. Estoque
+O schema explicitamente desliga RLS das tabelas de aplicação para reproduzir a produção atual.
 
-O modelo possui tanto `estoque` quanto `estoque_atual`, sendo o primeiro documentado como legado.
+Há também políticas públicas de leitura, escrita, atualização e exclusão nos buckets produtos e eventos.
 
-Isso é um sinal de dívida técnica.
+A V3 deve revisar ambos os pontos.
 
-Além disso, a baixa automática encontrada no frontend lê o estoque, calcula o novo valor e faz um UPDATE separado da movimentação. Isso não constitui uma operação transacional única.
+**Achado adicional:** a tabela inventarios é criada no schema, mas não aparece na lista usada pelo bloco que desliga RLS. Isso deve ser conferido no ambiente real.
 
-Na V3, venda + baixa + movimentação devem ser tratadas como uma operação atômica.
+## 6. Integridade transacional
 
-## 6. Identidade
+Estoque, vendas e caixa possuem operações que hoje podem depender de várias chamadas do frontend.
 
-Muitos registros guardam apenas o nome/login textual do operador.
+Na V3, operações críticas devem ser tratadas como transações ou funções protegidas no banco/backend.
 
-A V3 deve preferir:
+Também precisamos definir uma fonte de verdade para os totais de venda, já que historico_vendas.total é armazenado separadamente dos itens JSONB.
 
-- `user_id` para identidade;
-- perfil/role separado;
-- histórico preservado mesmo quando o nome muda;
-- eventualmente `created_by`, `updated_by`, `approved_by` etc.
+## 7. Próxima etapa
 
-Textos como nome do usuário podem continuar existindo como snapshot quando houver necessidade histórica, mas não devem substituir o identificador.
+Agora o banco deve ser cruzado com o código JavaScript.
 
-## 7. Multiempresa
+Vamos identificar:
 
-O schema atual não apresenta uma estrutura geral de empresa/unidade nos principais registros.
+1. tabelas realmente usadas por cada módulo;
+2. colunas realmente usadas;
+3. formatos dos JSONB;
+4. referências de usuário;
+5. campos legados;
+6. tabelas/colunas não utilizadas;
+7. operações críticas de venda, caixa, estoque e financeiro.
 
-Se a V3 mantiver apenas um estabelecimento por banco, isso pode ser aceitável. Se o objetivo for SaaS multiempresa, será necessário projetar explicitamente:
-
-`empresas` → `unidades` → usuários/membros → dados operacionais.
-
-Esse ponto deve ser decidido antes da remodelação do banco.
-
-## 8. Próximas verificações
-
-Antes de criar uma nova modelagem:
-
-1. levantar todas as tabelas do schema;
-2. mapear PK/FK;
-3. identificar campos legados;
-4. identificar tabelas sem relacionamento;
-5. separar identidade, configuração e dados operacionais;
-6. decidir estratégia multiempresa;
-7. desenhar RLS;
-8. definir operações transacionais críticas.
+Só depois desse cruzamento vamos propor o modelo físico da V3.
