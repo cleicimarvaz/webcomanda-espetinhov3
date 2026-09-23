@@ -56,6 +56,7 @@ Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica d
 - [Registro de decisões](decisoes/README.md)
 - [ADR-001 — Modelo organizacional](decisoes/ADR-001-modelo-organizacional.md)
 - [ADR-002 — Modelo relacional organizacional](decisoes/ADR-002-modelo-relacional-organizacional.md)
+- [Decisões de negócio pendentes](decisoes/decisoes-pendentes-negocio.md)
 
 ## Base analisada
 
