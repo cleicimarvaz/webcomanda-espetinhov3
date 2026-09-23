@@ -40,6 +40,16 @@ Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica d
 - [Módulos e dependências](arquitetura/modulos.md)
 - [Arquitetura de dados alvo](arquitetura/banco-de-dados.md)
 
+### Roadmap
+
+- [Roadmap da V3](roadmap/roadmap.md)
+- [Fase 01 — Fundação técnica e segurança](roadmap/fase-01.md)
+- [Backlog inicial](roadmap/backlog.md)
+
+### Decisões
+
+- [Registro de decisões](decisoes/README.md)
+
 ## Base analisada
 
 A base da V3 é a cópia pública da V2 existente neste repositório.
