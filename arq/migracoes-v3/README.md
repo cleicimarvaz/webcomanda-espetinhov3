@@ -66,3 +66,11 @@ Documentação: `docs/v3/arquitetura/migration-004-clientes-empresa.md`.
 Adiciona `empresa_id` a `produtos`, cria `estoque_produto_unidade` e adiciona `unidade_id` às movimentações, mantendo `produtos.estoque_atual` para compatibilidade durante a transição.
 
 Documentação: `docs/v3/arquitetura/migration-005-estoque-por-unidade.md`.
+
+### 006 — Contexto do inventário e integridade do estoque
+
+`006-contexto-inventario-estoque.sql`
+
+Adiciona `unidade_id` e referências relacionais ao domínio de inventário/movimentações, preservando os campos textuais legados e validando compatibilidade entre empresa do produto e empresa da unidade.
+
+Documentação: `docs/v3/arquitetura/migration-006-contexto-inventario-estoque.md`.
