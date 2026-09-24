@@ -45,6 +45,8 @@
 - [ ] Serviço de caixa
 - [ ] Serviço de estorno
 - [ ] Serviço de conta a receber
+- [ ] Serviço de reservas de evento
+- [ ] Serviço de emissão de ingresso
 - [ ] Serviço de validação de ingresso
 - [ ] Idempotência
 - [ ] Testes de concorrência
@@ -96,7 +98,7 @@
 - [x] Revisar Catálogo + Estoque
 - [x] Revisar Atendimento + Comandas + Cozinha
 - [x] Revisar Vendas + Caixa + Financeiro
-- [ ] Revisar Eventos + Ingressos
+- [x] Revisar Eventos + Ingressos
 - [ ] Revisar Relatórios
 - [ ] Revisar Impressão
 - [ ] Fechar decisões de negócio restantes
