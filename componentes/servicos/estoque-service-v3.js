@@ -104,7 +104,7 @@
             return [];
         }
 
-        const { data, error } = await _supabase
+        const { data, error } = await _supabaseV3
             .from('estoque_produto_unidade')
             .select('produto_id, unidade_id, saldo, updated_at')
             .eq('unidade_id', unidadeId)
