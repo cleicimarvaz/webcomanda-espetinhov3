@@ -116,3 +116,13 @@ A ordem de validação é:
 As migrations `001–008` continuam documentadas porque representam o caminho incremental criado antes da decisão de usar um banco V3 separado.
 
 Elas não devem ser aplicadas cegamente sobre o schema novo. Quando o banco novo estiver sendo montado, as estruturas equivalentes do schema base serão a referência.
+
+## Funções transacionais
+
+O schema base concentra a estrutura das tabelas e views. As funções de serviço transacional do estoque ficam separadas em:
+
+`arq/funcoes-v3/001-estoque-transacional.sql`
+
+A separação deixa explícita a ordem de preparação do banco novo:
+
+`schema base → funções V3 → bootstrap → testes`.
