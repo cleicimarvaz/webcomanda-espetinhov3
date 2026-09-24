@@ -63,9 +63,10 @@ O frontend não deve precisar conhecer detalhes internos das tabelas para execut
 
 ### 5. Infraestrutura
 
-Concentra integrações externas:
+Concentra integrações externas e recursos de ambiente:
 
-- Supabase;
+- Supabase V2, durante a transição;
+- Supabase/banco dedicado da V3;
 - Storage;
 - impressão;
 - QR Code;
@@ -167,7 +168,7 @@ Exemplo:
 
 em vez de uma tela executar diretamente várias operações independentes em tabelas diferentes.
 
-Durante a transição, funções existentes em `database.js` podem permanecer como compatibilidade, mas o objetivo final é reduzir o uso direto de `_supabase` pelos módulos de negócio.
+Durante a transição, funções existentes em `database.js` e o cliente `_supabase` permanecem como compatibilidade da V2. A V3 possui um cliente separado, `_supabaseV3`, configurado em `config-v3.js` e inicializado por `database-v3.js`. Novos serviços V3 devem evitar dependência do cliente legado.
 
 ## PWA e offline
 
