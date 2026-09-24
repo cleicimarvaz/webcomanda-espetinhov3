@@ -101,7 +101,7 @@
 - [x] Revisar Eventos + Ingressos
 - [x] Revisar Relatórios
 - [x] Revisar Impressão
-- [ ] Fechar decisões de negócio restantes
+- [x] Fechar decisões de negócio restantes
 - [ ] Revisar modelo relacional completo
 - [x] Definir contratos dos serviços por domínio
 - [ ] Consolidar SQL final do banco
@@ -112,3 +112,10 @@
 Foram concluídas as revisões de Relatórios + Impressão e criado o contrato do serviço de relatórios. O contrato de impressão também foi refinado para separar operação comercial, execução de impressão, reimpressão, idempotência e adaptadores por dispositivo.
 
 O banco V3 permanece como etapa final.
+
+
+## Atualização — Fechamento das decisões de negócio
+
+Em 2026-09-24 foi criado o ADR-004, consolidando as decisões funcionais abertas dos domínios de catálogo, estoque, atendimento, vendas, financeiro, eventos, ingressos, relatórios e impressão.
+
+O próximo passo da modelagem é revisar o modelo relacional completo com base nessas decisões. O banco V3 continua como etapa final.
