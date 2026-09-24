@@ -77,3 +77,12 @@ Foram definidos:
 Com as decisões fechadas, a próxima etapa é revisar o **modelo funcional e relacional completo** para incorporar as consequências dessas definições antes da consolidação do SQL físico.
 
 O banco V3 continua sem criação física nesta fase.
+
+
+## Encerramento formal das pendências
+
+Após a Revisão 06, nenhum dos temas listados neste documento permanece aberto para a modelagem da V3.
+
+Os pontos que surgiram como consequências estruturais das decisões — como LOTES_INGRESSO, TRANSFERENCIAS_INGRESSO, PORTARIAS_EVENTO, IMPRESSOES, ARQUIVOS e PRODUTO_CODIGOS_BARRAS — estão consolidados na Revisão 06 do modelo relacional.
+
+Qualquer necessidade funcional nova depois desta data deverá ser registrada como nova decisão/ADR, sem reabrir silenciosamente este documento.
