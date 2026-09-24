@@ -1,8 +1,8 @@
-# Integração gradual — movimentação manual de estoque
+# Integração gradual — estoque manual e inventário
 
 ## Objetivo
 
-O fluxo de **Ajustar estoque** da tela de Produtos ganhou uma ponte para a arquitetura V3 sem remover o comportamento legado.
+Os fluxos de **Ajustar estoque** e **Importar Contagem** da tela de Produtos ganharam uma ponte para a arquitetura V3 sem remover o comportamento legado.
 
 A troca é controlada por uma feature flag local e, portanto, não fica ativa por padrão.
 
@@ -16,6 +16,10 @@ Com a flag ligada:
 
 `produtos.js → estoque-adapter-v3 → estoque-service-v3 → RPC → estoque_produto_unidade + estoque_movimentacoes`
 
+No inventário:
+
+`estoque-inventario.js → estoque-adapter-v3 → estoque-service-v3 → RPC → inventarios + estoque_produto_unidade + estoque_movimentacoes`
+
 ## Ativar no ambiente de desenvolvimento
 
 Depois de aplicar e validar as migrations necessárias no banco de desenvolvimento, abrir o console do navegador na página de Produtos:
@@ -25,7 +29,7 @@ localStorage.setItem('v3_estoque_transacional', 'true');
 location.reload();
 ```
 
-A partir daí, um ajuste manual deve usar o caminho V3.
+A partir daí, o ajuste manual e o inventário via planilha devem usar o caminho V3.
 
 ## Desativar
 
@@ -35,6 +39,12 @@ location.reload();
 ```
 
 O caminho legado volta a ser utilizado.
+
+## Inventário via planilha
+
+Com a flag ativa, a exportação da planilha usa o saldo da unidade selecionada. Na importação, a prévia também compara com o saldo da unidade, e a confirmação deixa o banco calcular novamente a diferença usando o saldo bloqueado no servidor.
+
+Isso é importante para evitar que a planilha represente um saldo antigo no momento da confirmação.
 
 ## O que conferir
 
@@ -78,4 +88,10 @@ Isso não desfaz uma operação que já tenha sido registrada no modelo V3. Para
 
 Esta integração é um primeiro piloto técnico.
 
-Ainda não foi aplicada à baixa automática das vendas/comandas nem ao inventário via planilha.
+Já cobre:
+- movimentação manual de estoque;
+- exportação de inventário por unidade;
+- importação de contagem;
+- conclusão transacional do inventário.
+
+Ainda não foi aplicada à baixa automática das vendas/comandas.
