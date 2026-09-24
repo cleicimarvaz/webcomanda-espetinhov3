@@ -289,6 +289,28 @@ begin
         );
     end loop;
 
+    if v_processados > 0 then
+        insert into public.auditoria (
+            usuario,
+            tipo,
+            action,
+            description
+        )
+        values (
+            v_usuario_nome,
+            'ESTOQUE',
+            'MOVIMENTAÇÃO DE ESTOQUE V3',
+            format(
+                'OPERAÇÃO: %s | TIPO: %s | UNIDADE: %s | PRODUTOS: %s | MOTIVO: %s',
+                p_operacao_id,
+                upper(p_tipo),
+                p_unidade_id,
+                v_processados,
+                upper(trim(p_motivo))
+            )
+        );
+    end if;
+
     return jsonb_build_object(
         'ok', true,
         'idempotente', false,
@@ -298,7 +320,7 @@ begin
         'movimentacoes', v_movimentacoes
     );
 end;
-$$;
+$;
 
 comment on function public.registrar_movimentacoes_estoque_v3(uuid, bigint, text, jsonb, text, uuid)
     is 'Entrada ou saída manual de estoque por unidade, com bloqueio, histórico e idempotência.';
@@ -540,6 +562,26 @@ begin
     update public.inventarios
        set total_ajustados = v_total_ajustados
      where id = v_inventario_id;
+
+    insert into public.auditoria (
+        usuario,
+        tipo,
+        action,
+        description
+    )
+    values (
+        v_usuario_nome,
+        'ESTOQUE',
+        'INVENTÁRIO V3 CONCLUÍDO',
+        format(
+            'OPERAÇÃO: %s | INVENTÁRIO: %s | UNIDADE: %s | PRODUTOS: %s | AJUSTADOS: %s',
+            p_operacao_id,
+            v_inventario_id,
+            p_unidade_id,
+            v_total_produtos,
+            v_total_ajustados
+        )
+    );
 
     return jsonb_build_object(
         'ok', true,
