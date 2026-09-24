@@ -61,19 +61,28 @@ SELECT
           AND column_name = 'senha'
     ) AS possui_coluna_senha;
 
--- 4. Funções transacionais esperadas
+-- 4. Funções V3 esperadas
+-- A validação usa a assinatura para evitar confundir a função trigger
+-- validar_contexto_estoque_v3() com as funções de serviço.
 SELECT
-    routine_name,
-    routine_type
-FROM information_schema.routines
-WHERE routine_schema = 'public'
-  AND routine_name IN (
-      'registrar_baixa_estoque_v3',
-      'registrar_movimentacoes_estoque_v3',
-      'concluir_inventario_v3',
-      'validar_contexto_estoque_v3'
+    p.proname AS nome,
+    pg_get_function_identity_arguments(p.oid) AS argumentos
+FROM pg_proc p
+JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE n.nspname = 'public'
+  AND (
+      (p.proname = 'validar_acesso_estoque_v3'
+       AND pg_get_function_identity_arguments(p.oid) = 'p_unidade_id uuid, p_usuario_id bigint')
+      OR
+      (p.proname = 'registrar_movimentacoes_estoque_v3'
+       AND pg_get_function_identity_arguments(p.oid) =
+           'p_unidade_id uuid, p_usuario_id bigint, p_tipo text, p_itens jsonb, p_motivo text, p_operacao_id uuid')
+      OR
+      (p.proname = 'concluir_inventario_v3'
+       AND pg_get_function_identity_arguments(p.oid) =
+           'p_unidade_id uuid, p_usuario_id bigint, p_linhas jsonb, p_observacao text, p_operacao_id uuid')
   )
-ORDER BY routine_name;
+ORDER BY p.proname;
 
 -- 5. Views de apoio esperadas
 SELECT
