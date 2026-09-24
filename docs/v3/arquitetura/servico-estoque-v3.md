@@ -63,14 +63,13 @@ Assim, o retry pode ser reconhecido pelo banco.
 
 O serviço ainda não:
 
-- substitui `salvarMovimentacao()` da V2;
 - substitui `processarBaixaEstoqueAutomatica()`;
 - altera `produtos.estoque_atual`;
-- resolve seleção de unidade na interface;
+- resolve a seleção de unidade com uma tela dedicada;
 - implementa RLS;
 - controla permissões por código de permissão.
 
-Esses pontos serão feitos em etapas separadas.
+O fluxo de ajuste manual e o inventário via planilha já possuem integração piloto protegida por feature flag.
 
 ## Regra de migração
 
@@ -97,7 +96,7 @@ O módulo `produtos.html` já carrega:
 - `estoque-service-v3.js`;
 - `estoque-adapter-v3.js`.
 
-A integração do ajuste manual está protegida por uma feature flag local:
+A integração do ajuste manual e do inventário via planilha está protegida por uma feature flag local:
 
 ```js
 localStorage.setItem('v3_estoque_transacional', 'true');
@@ -105,7 +104,7 @@ localStorage.setItem('v3_estoque_transacional', 'true');
 
 Com a flag desligada, `salvarMovimentacao()` continua usando o fluxo legado da V2.
 
-Com a flag ligada, a operação deixa de atualizar `produtos.estoque_atual` e passa pelo serviço V3, que grava em `estoque_produto_unidade` e `estoque_movimentacoes` por meio da RPC.
+Com a flag ligada, o ajuste manual deixa de atualizar `produtos.estoque_atual` e passa pelo serviço V3. O inventário também consulta o saldo da unidade e conclui o lote pela RPC, gravando em `estoque_produto_unidade`, `estoque_movimentacoes` e `inventarios`.
 
 Para desligar novamente:
 
