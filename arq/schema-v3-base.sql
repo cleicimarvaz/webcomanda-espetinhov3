@@ -2,7 +2,9 @@
 -- WEBCOMANDA ESPETINHO V3
 -- SCHEMA BASE — BANCO V3 INICIAL
 -- =====================================================================
--- STATUS: RASCUNHO / NÃO EXECUTAR EM PRODUÇÃO
+-- STATUS: RASCUNHO ARQUITETURAL / NÃO EXECUTAR AINDA
+-- Este schema é uma fundação provisória e será revisado quando o modelo V3
+-- estiver fechado. O banco físico final será criado de uma vez mais adiante.
 --
 -- Este arquivo é para um banco V3 NOVO.
 --
