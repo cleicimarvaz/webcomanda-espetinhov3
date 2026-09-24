@@ -29,7 +29,7 @@
 ## Dados
 
 - [ ] Mapear campos legados
-- [ ] Definir estratégia para `produtos.estoque`
+- [ ] Definir estratégia para produtos.estoque
 - [ ] Definir evolução de itens JSONB
 - [ ] Definir identidade relacional em registros operacionais
 - [ ] Separar configurações globais, empresariais, por unidade e por usuário
@@ -37,7 +37,7 @@
 
 ## Operações críticas
 
-- [ ] Contrato do serviço de venda
+- [x] Contrato do serviço de venda
 - [ ] Serviço de venda
 - [x] Contrato do serviço de fechamento de comanda
 - [ ] Serviço de fechamento de comanda
@@ -95,7 +95,7 @@
 - [x] Criar contratos iniciais de atendimento e financeiro
 - [x] Revisar Catálogo + Estoque
 - [x] Revisar Atendimento + Comandas + Cozinha
-- [ ] Revisar Vendas + Caixa + Financeiro
+- [x] Revisar Vendas + Caixa + Financeiro
 - [ ] Revisar Eventos + Ingressos
 - [ ] Revisar Relatórios
 - [ ] Revisar Impressão
