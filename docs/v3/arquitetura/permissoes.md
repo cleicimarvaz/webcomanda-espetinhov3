@@ -57,7 +57,7 @@ Exemplos:
 ## Estrutura recomendada
 
 `usuarios`
-→ `usuario_papeis`
+→ `membros_organizacao`
 → `papeis`
 → `papel_permissoes`
 → `permissoes`
@@ -104,3 +104,7 @@ Depois, as permissões podem ser detalhadas sem depender de novos valores dentro
 - RLS considera o contexto organizacional;
 - alterações de permissão ficam auditadas;
 - uma chamada direta à API não consegue contornar as permissões da interface.
+
+## Estado da modelagem
+
+A V3 adotará `membros_organizacao` como vínculo entre usuário, empresa, unidade e papel. A referência anterior a `usuario_papeis` deve ser considerada substituída por esse modelo.
