@@ -18,26 +18,40 @@
         }
     }
 
-    function obterUsuarioId() {
-        const valor = localStorage.getItem('userId');
+    async function obterUsuarioId() {
+        exigirSupabase();
 
-        if (valor === null || valor === undefined || valor === '') {
-            throw new Error('Usuário não identificado na sessão atual.');
+        // Durante a transição, a sessão ainda é criada pela V2.
+        // O banco V3 resolve o usuário pelo login, evitando depender do mesmo
+        // ID numérico entre bancos diferentes.
+        const login = localStorage.getItem('userLogin');
+
+        if (!login) {
+            throw new Error('Login do usuário não encontrado na sessão atual.');
         }
 
-        const id = Number(valor);
+        const { data: usuario, error } = await _supabaseV3
+            .from('usuarios')
+            .select('id')
+            .eq('usuario', login)
+            .eq('ativo', true)
+            .maybeSingle();
 
-        if (!Number.isInteger(id) || id <= 0) {
-            throw new Error('userId inválido na sessão atual.');
+        if (error) {
+            throw error;
         }
 
-        return id;
+        if (!usuario) {
+            throw new Error('Usuário da sessão não foi encontrado no banco V3.');
+        }
+
+        return usuario.id;
     }
 
     async function listarVinculos() {
         exigirSupabase();
 
-        const usuarioId = obterUsuarioId();
+        const usuarioId = await obterUsuarioId();
 
         const { data: membros, error: erroMembros } = await _supabaseV3
             .from('membros_organizacao')
