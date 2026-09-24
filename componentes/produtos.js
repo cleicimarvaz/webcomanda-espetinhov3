@@ -752,7 +752,11 @@ window.renderizarEstoque = async function() {
 
             unidadeNome = contextoFinal.unidade?.nome || '';
 
-            const { data, error } = await _supabase
+            if (typeof _supabaseV3 === 'undefined' || !_supabaseV3) {
+                throw new Error('Banco V3 não configurado.');
+            }
+
+            const { data, error } = await _supabaseV3
                 .from('produtos')
                 .select('*')
                 .eq('controlar_estoque', true)
