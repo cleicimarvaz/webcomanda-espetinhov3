@@ -462,7 +462,7 @@ create unique index if not exists ux_estoque_mov_operacao_produto_tipo
 create or replace function public.validar_contexto_estoque_v3()
 returns trigger
 language plpgsql
-as $$
+as $
 declare
     v_empresa_produto uuid;
     v_empresa_unidade uuid;
@@ -481,14 +481,20 @@ begin
         raise exception 'Produto ou unidade inexistente.';
     end if;
 
-    if v_empresa_produto <> v_empresa_unidade
-       or new.empresa_id <> v_empresa_produto then
+    if v_empresa_produto <> v_empresa_unidade then
+        raise exception 'Produto e unidade possuem contextos empresariais incompatíveis.';
+    end if;
+
+    -- estoque_produto_unidade não possui empresa_id: a empresa é derivada
+    -- do produto e da unidade.
+    if TG_TABLE_NAME = 'estoque_movimentacoes'
+       and new.empresa_id <> v_empresa_produto then
         raise exception 'Empresa, produto e unidade possuem contextos incompatíveis.';
     end if;
 
     return new;
 end;
-$$;
+$;
 
 drop trigger if exists trg_validar_estoque_produto_unidade_v3
     on public.estoque_produto_unidade;
