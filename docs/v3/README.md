@@ -6,9 +6,11 @@ Documentação da evolução do WebComanda Espetinho a partir da V2.
 
 A V3 será planejada sobre a base real da V2, preservando o que já funciona e evitando duplicar funcionalidades existentes.
 
-## Regra desta etapa
+## Estado atual
 
-Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica da aplicação deve ser feita sem decisão posterior registrada.
+A V3 já possui a fundação técnica inicial separada da V2, com banco dedicado, contexto organizacional e movimentação de estoque transacional preparados para testes em desenvolvimento.
+
+A regra continua sendo evoluir por etapas: alterações críticas devem ser documentadas, a V2 permanece utilizável e nenhuma operação deve ser executada contra produção sem validação prévia.
 
 ## Estrutura
 
@@ -52,6 +54,7 @@ Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica d
 - [Tela de configuração do banco V3](arquitetura/configuracao-banco-v3.md)
 - [Teste das operações transacionais de estoque](arquitetura/teste-estoque-transacional.md)
 - [Integração gradual da movimentação manual V3](arquitetura/integracao-movimentacao-manual-v3.md)
+- [Pre-flight do banco V3](testes/preflight-banco-v3.md)
 
 ### Roadmap
 
