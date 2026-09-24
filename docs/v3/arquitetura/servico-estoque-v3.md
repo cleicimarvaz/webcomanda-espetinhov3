@@ -88,3 +88,29 @@ Primeiro validamos:
 - comportamento de erro.
 
 Somente depois começamos a trocar os chamadores da V2.
+
+## Integração gradual com o módulo Produtos
+
+O módulo `produtos.html` já carrega:
+
+- `organizacao-service-v3.js`;
+- `estoque-service-v3.js`;
+- `estoque-adapter-v3.js`.
+
+A integração do ajuste manual está protegida por uma feature flag local:
+
+```js
+localStorage.setItem('v3_estoque_transacional', 'true');
+```
+
+Com a flag desligada, `salvarMovimentacao()` continua usando o fluxo legado da V2.
+
+Com a flag ligada, a operação deixa de atualizar `produtos.estoque_atual` e passa pelo serviço V3, que grava em `estoque_produto_unidade` e `estoque_movimentacoes` por meio da RPC.
+
+Para desligar novamente:
+
+```js
+localStorage.removeItem('v3_estoque_transacional');
+```
+
+A feature flag deve ser usada somente depois que as migrations correspondentes estiverem aplicadas no banco de desenvolvimento.
