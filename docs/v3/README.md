@@ -41,6 +41,8 @@ A regra continua sendo evoluir por etapas: alterações críticas devem ser docu
 - [Arquitetura alvo da V3](arquitetura/arquitetura-v3.md)
 - [Módulos e dependências](arquitetura/modulos.md)
 - [Arquitetura de dados alvo](arquitetura/banco-de-dados.md)
+- [Mapeamento V2 → V3](arquitetura/mapeamento-v2-v3.md)
+- [Modelo funcional e de dados completo V3](arquitetura/modelo-funcional-completo-v3.md)
 - [Schema base do banco V3](arquitetura/schema-v3-base.md)
 - [Funções transacionais do banco V3](arquitetura/schema-v3-base.md#funções-transacionais)
 - [Pre-flight do banco V3](testes/preflight-banco-v3.md)
