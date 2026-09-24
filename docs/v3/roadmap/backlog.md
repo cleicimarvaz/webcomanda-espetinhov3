@@ -13,6 +13,15 @@
 - [ ] Criar padrão de auditoria
 - [ ] Consolidar Service Worker
 
+## Banco V3 — etapa final
+
+- [ ] Criar projeto/banco Supabase V3
+- [ ] Executar schema base
+- [ ] Executar funções V3
+- [ ] Executar bootstrap administrativo
+- [ ] Rodar pre-flight
+- [ ] Rodar smoke tests
+
 ## Dados
 
 - [ ] Mapear campos legados
@@ -24,7 +33,9 @@
 
 ## Operações críticas
 
+- [ ] Contrato do serviço de venda
 - [ ] Serviço de venda
+- [ ] Contrato do serviço de fechamento de comanda
 - [ ] Serviço de fechamento de comanda
 - [ ] Serviço de baixa de estoque
 - [ ] Serviço de caixa
