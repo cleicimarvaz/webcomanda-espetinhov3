@@ -56,7 +56,6 @@ A regra continua sendo evoluir por etapas: alterações críticas devem ser docu
 - [Tela de configuração do banco V3](arquitetura/configuracao-banco-v3.md)
 - [Teste das operações transacionais de estoque](arquitetura/teste-estoque-transacional.md)
 - [Integração gradual da movimentação manual V3](arquitetura/integracao-movimentacao-manual-v3.md)
-- [Pre-flight do banco V3](testes/preflight-banco-v3.md)
 
 ### Roadmap
 
