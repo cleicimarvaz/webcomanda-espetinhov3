@@ -268,7 +268,6 @@ begin
         usuario_id,
         empresa_id,
         unidade_id,
-        usuario,
         tipo,
         action,
         description,
@@ -280,7 +279,6 @@ begin
         p_usuario_id,
         v_empresa_id,
         p_unidade_id,
-        v_usuario_nome,
         'ESTOQUE',
         'MOVIMENTAÇÃO DE ESTOQUE V3',
         format(
@@ -535,7 +533,6 @@ begin
         usuario_id,
         empresa_id,
         unidade_id,
-        usuario,
         tipo,
         action,
         description,
@@ -547,7 +544,6 @@ begin
         p_usuario_id,
         v_empresa_id,
         p_unidade_id,
-        v_usuario_nome,
         'ESTOQUE',
         'INVENTÁRIO V3 CONCLUÍDO',
         format(
