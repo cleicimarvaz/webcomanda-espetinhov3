@@ -67,20 +67,20 @@ SELECT
 -- validar_contexto_estoque_v3() com as funções de serviço.
 SELECT
     p.proname AS nome,
-    pg_get_function_identity_arguments(p.oid) AS argumentos
+    pg_get_function_arguments(p.oid) AS argumentos
 FROM pg_proc p
 JOIN pg_namespace n ON n.oid = p.pronamespace
 WHERE n.nspname = 'public'
   AND (
       (p.proname = 'validar_acesso_estoque_v3'
-       AND pg_get_function_identity_arguments(p.oid) = 'p_unidade_id uuid, p_usuario_id bigint')
+       AND pg_get_function_arguments(p.oid) = 'p_unidade_id uuid, p_usuario_id bigint')
       OR
       (p.proname = 'registrar_movimentacoes_estoque_v3'
-       AND pg_get_function_identity_arguments(p.oid) =
+       AND pg_get_function_arguments(p.oid) =
            'p_unidade_id uuid, p_usuario_id bigint, p_tipo text, p_itens jsonb, p_motivo text, p_operacao_id uuid')
       OR
       (p.proname = 'concluir_inventario_v3'
-       AND pg_get_function_identity_arguments(p.oid) =
+       AND pg_get_function_arguments(p.oid) =
            'p_unidade_id uuid, p_usuario_id bigint, p_linhas jsonb, p_observacao text, p_operacao_id uuid')
   )
 ORDER BY p.proname;
