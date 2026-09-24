@@ -90,3 +90,22 @@ Nome da empresa/unidade e identidade do operador devem vir do contexto autorizad
 ### Falhas
 
 Falha na impressão não desfaz a operação que originou o documento.
+
+
+## ADDENDUM REVISAO 06 — Histórico e reimpressão
+
+O serviço passa a considerar o histórico de impressão como entidade transversal.
+
+Cada tentativa relevante registra:
+
+- operação de origem;
+- documento;
+- dispositivo;
+- adaptador;
+- data/hora;
+- sucesso ou erro;
+- mensagem técnica quando aplicável.
+
+Reimpressão referencia a operação original e não cria nova operação comercial ou financeira.
+
+O navegador/PDF continua como fallback obrigatório. A solução térmica pode usar conector local, com RawBT mantido apenas como adaptador de compatibilidade.
