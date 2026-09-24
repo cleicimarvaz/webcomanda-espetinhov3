@@ -39,6 +39,7 @@ Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica d
 - [Arquitetura alvo da V3](arquitetura/arquitetura-v3.md)
 - [Módulos e dependências](arquitetura/modulos.md)
 - [Arquitetura de dados alvo](arquitetura/banco-de-dados.md)
+- [Schema base do banco V3](arquitetura/schema-v3-base.md)
 - [Modelo organizacional](arquitetura/modelo-organizacional.md)
 - [Papéis e permissões](arquitetura/permissoes.md)
 - [Modelo relacional organizacional](arquitetura/modelo-relacional-organizacional.md)
