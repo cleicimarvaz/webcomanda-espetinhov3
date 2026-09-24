@@ -478,3 +478,75 @@ A arquitetura técnica exige que conflitos críticos sejam resolvidos no serviç
 Nenhuma decisão funcional deve ser codificada como regra permanente antes de ser validada.
 
 O banco V3 será criado somente depois que as revisões de todos os domínios estiverem concluídas e as decisões necessárias estiverem consolidadas.
+
+
+## 35. Eventos + ingressos
+
+A revisão técnica foi concluída. As definições abaixo continuam sendo decisões funcionais e devem ser fechadas antes do SQL definitivo.
+
+### Evento
+
+Definir:
+- se o evento terá unidade física obrigatória ou poderá ser corporativo;
+- estados oficiais do evento;
+- momento em que o evento fica público;
+- regras de encerramento e cancelamento.
+
+### Mesas e reservas
+
+Definir:
+- prazo de retenção de reserva pendente;
+- expiração automática;
+- tipos de reserva;
+- preço padrão e preços especiais;
+- obrigatoriedade de cliente cadastrado;
+- necessidade de posição gráfica da mesa.
+
+### Ingressos
+
+Definir:
+- tipo simples ou tipo + lote;
+- janela de venda;
+- limite por oferta/evento;
+- solicitação pública antes da venda;
+- forma de pagamento e confirmação manual/integrada;
+- necessidade de caixa;
+- transferência;
+- reentrada;
+- cancelamento e estorno.
+
+### Portaria
+
+Definir:
+- permissões para validar;
+- quantidade de portarias;
+- identificação do dispositivo;
+- comportamento quando a conexão cair;
+- necessidade de modo contingência.
+
+### Patrocinadores
+
+Definir quais dados entram no primeiro modelo: somente cadastro e vínculo ou também cota, valor, posição, material e período.
+
+## 36. Matriz complementar — Eventos + Ingressos
+
+| Tema | Direção técnica | Decisão funcional necessária? |
+|---|---|---|
+| Escopo do evento | empresa + unidade opcional | Sim |
+| Mesas | evento_mesas | Não para a estrutura |
+| Reserva de mesa | reservas + reserva_mesas | Sim para retenção/expiração |
+| Ocupação | protegida no banco/serviço | Não para a direção |
+| Histórico | preservado | Não |
+| Patrocinadores | entidades normalizadas | Sim para campos finais |
+| Tipo/lote | oferta vendável estruturada | Sim |
+| Limite | controle transacional | Sim para a regra de limite |
+| Solicitação pública | entidade opcional antes da emissão | Sim |
+| Ingresso | individual + código único | Não |
+| Venda | integrada a vendas | Sim para regras de pagamento |
+| Validação | transição atômica + histórico | Não |
+| Reentrada | regra específica | Sim |
+| Transferência | regra específica | Sim |
+| Cancelamento/estorno | operação compensatória | Sim |
+| Portarias | suporte a múltiplos dispositivos | Sim |
+
+Nenhuma dessas decisões deve virar constraint permanente antes do fechamento da modelagem.
