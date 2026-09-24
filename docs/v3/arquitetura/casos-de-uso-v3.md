@@ -195,3 +195,31 @@ O fluxo deve preservar três proteções centrais:
 3. um ingresso não pode ser consumido duas vezes por portarias ou requisições concorrentes.
 
 Impressão e notificações permanecem efeitos posteriores e não definem o sucesso da operação principal.
+
+## ADDENDUM REVISAO 06 — Casos de uso após fechamento das decisões
+
+### Estoque
+
+- Transferir estoque: enviar, acompanhar em trânsito e receber na unidade destino.
+- Cancelar transferência: reverter uma transferência ainda não recebida, conforme permissão.
+
+### Financeiro
+
+- Receber conta em outra unidade: registrar recebimento na unidade/caixa do operador mantendo a unidade de origem da conta.
+- Fechar caixa: exigir contagem física e justificativa para diferença.
+
+### Eventos e ingressos
+
+- Criar/encerrar lote de ingresso.
+- Solicitar ingresso publicamente, quando habilitado.
+- Transferir ingresso.
+- Registrar reentrada quando o evento permitir.
+- Cancelar e estornar ingresso conforme as regras do evento.
+- Cadastrar portaria/dispositivo.
+
+### Impressão
+
+- Registrar tentativa de impressão.
+- Reimprimir documento a partir da operação original.
+
+A reimpressão não cria nova operação comercial ou financeira.
