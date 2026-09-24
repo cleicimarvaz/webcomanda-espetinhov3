@@ -134,7 +134,7 @@
             };
         }
 
-        const unidade = dados.unidades.find((item) => item.id === unidadeId);
+        const unidade = dados.unidades.find((item) => String(item.id) === String(unidadeId));
 
         if (!unidade) {
             localStorage.removeItem(STORAGE_KEY_UNIDADE);
@@ -171,7 +171,7 @@
             throw new Error('A unidade selecionada não está disponível para este usuário.');
         }
 
-        localStorage.setItem(STORAGE_KEY_UNIDADE, unidade.id);
+        localStorage.setItem(STORAGE_KEY_UNIDADE, String(unidade.id));
 
         return {
             usuarioId: dados.usuarioId,
