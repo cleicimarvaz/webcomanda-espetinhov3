@@ -80,3 +80,13 @@
 - [ ] Melhorar notificações
 - [ ] Definir automações
 - [ ] Definir integrações futuras
+## Modelagem do domínio — etapa atual
+
+- [x] Consolidar entidades principais da V3
+- [x] Mapear relações entre os domínios
+- [x] Definir fontes de verdade iniciais
+- [x] Mapear estruturas da V2 para a V3
+- [ ] Fechar decisões de negócio restantes
+- [ ] Revisar modelo relacional completo
+- [ ] Definir contratos dos serviços por domínio
+- [ ] Consolidar SQL final do banco
