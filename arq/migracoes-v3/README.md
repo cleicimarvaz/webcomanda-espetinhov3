@@ -94,3 +94,9 @@ Prepara `registrar_movimentacoes_estoque_v3` para entradas/saídas manuais e `co
 A V2 ainda não chama essas RPCs e `produtos.estoque_atual` permanece inalterado por elas.
 
 Documentação: `docs/v3/arquitetura/migration-008-movimentacao-inventario-transacional.md`.
+
+### Smoke test — estoque transacional
+
+`008-smoke-test-estoque.sql`
+
+Consultas somente de leitura para validar a presença das funções, colunas, índices e integridade básica após as migrations. Não cria nem altera dados.
