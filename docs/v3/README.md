@@ -52,6 +52,7 @@ A regra continua sendo evoluir por etapas: alterações críticas devem ser docu
 - [Mapeamento de chaves organizacionais](arquitetura/mapeamento-chaves-organizacionais.md)
 - [Migration 008 — Movimentação e inventário transacionais](arquitetura/migration-008-movimentacao-inventario-transacional.md)
 - [Serviço V3 de estoque](arquitetura/servico-estoque-v3.md)
+- [Contrato do serviço de venda V3](arquitetura/contrato-servico-venda-v3.md)
 - [Serviço V3 de contexto organizacional](arquitetura/servico-contexto-organizacional-v3.md)
 - [Configuração e cliente do banco V3](decisoes/ADR-003-banco-dados-v3-separado.md)
 - [Tela de configuração do banco V3](arquitetura/configuracao-banco-v3.md)
