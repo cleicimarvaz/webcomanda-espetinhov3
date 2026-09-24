@@ -37,7 +37,11 @@ window.exportarInventarioParaExcel = async function () {
                 );
             }
 
-            const { data: produtos, error } = await _supabase
+            if (typeof _supabaseV3 === 'undefined' || !_supabaseV3) {
+                throw new Error('Banco V3 não configurado.');
+            }
+
+            const { data: produtos, error } = await _supabaseV3
                 .from('produtos')
                 .select('id, nome, categoria')
                 .eq('controlar_estoque', true)
@@ -135,19 +139,26 @@ window.handleArquivoImportacaoInventario = async function (event) {
             const linhasBrutas = XLSX.utils.sheet_to_json(primeiraAba, { defval: '' });
 
             const ids = linhasBrutas.map((l) => parseInt(l.id)).filter((id) => !isNaN(id));
-
-            const { data: produtosBanco, error } = await _supabase
-                .from('produtos')
-                .select('id, nome, controlar_estoque, estoque_atual')
-                .in('id', ids);
-            if (error) throw error;
-
             const v3Ativo = localStorage.getItem('v3_estoque_transacional') === 'true';
 
+            let produtosBanco = [];
+
             if (v3Ativo) {
+                if (typeof _supabaseV3 === 'undefined' || !_supabaseV3) {
+                    throw new Error('Banco V3 não configurado.');
+                }
+
                 if (!window.estoqueAdapterV3) {
                     throw new Error('Adaptador de estoque V3 não carregado.');
                 }
+
+                const { data, error } = await _supabaseV3
+                    .from('produtos')
+                    .select('id, nome, controlar_estoque')
+                    .in('id', ids);
+
+                if (error) throw error;
+                produtosBanco = data || [];
 
                 const saldoResult = await window.estoqueAdapterV3.obterSaldos(ids);
                 if (!saldoResult.handled) throw new Error('Não foi possível consultar o estoque V3.');
@@ -156,12 +167,20 @@ window.handleArquivoImportacaoInventario = async function (event) {
                     (saldoResult.data || []).map((item) => [item.produto_id, Number(item.saldo || 0)])
                 );
 
-                for (const produto of produtosBanco || []) {
+                for (const produto of produtosBanco) {
                     produto.estoque_atual = saldosPorProduto.get(produto.id) || 0;
                 }
+            } else {
+                const { data, error } = await _supabase
+                    .from('produtos')
+                    .select('id, nome, controlar_estoque, estoque_atual')
+                    .in('id', ids);
+
+                if (error) throw error;
+                produtosBanco = data || [];
             }
 
-            const produtosPorId = new Map((produtosBanco || []).map((p) => [p.id, p]));
+            const produtosPorId = new Map(produtosBanco.map((p) => [p.id, p]));
 
             window.linhasImportacaoInventario = linhasBrutas.map((linha) => window.validarLinhaImportacaoInventario(linha, produtosPorId));
             window.renderizarPreviaImportacaoInventario();
@@ -280,14 +299,6 @@ window.confirmarImportacaoInventario = async function () {
 
             if (!resultadoV3.handled) {
                 throw new Error('Inventário V3 não processado.');
-            }
-
-            if (typeof registrarLog === 'function') {
-                await registrarLog(
-                    'ESTOQUE',
-                    'INVENTÁRIO VIA PLANILHA V3',
-                    `LOTE #${resultadoV3.data?.inventario_id || 'N/A'} | ${linhasValidas.length} PRODUTO(S) CONFERIDO(S), ${resultadoV3.data?.total_ajustados || 0} AJUSTADO(S) | UNIDADE: ${resultadoV3.contexto?.unidade?.nome || resultadoV3.contexto?.unidadeId || 'N/A'}`
-                );
             }
 
             if (typeof showToast === 'function') {
