@@ -84,6 +84,7 @@
 - [ ] Melhorar notificações
 - [ ] Definir automações
 - [ ] Definir integrações futuras
+
 ## Modelagem do domínio — etapa atual
 
 - [x] Consolidar entidades principais da V3
@@ -92,6 +93,12 @@
 - [x] Mapear estruturas da V2 para a V3
 - [x] Mapear casos de uso centrais
 - [x] Criar contratos iniciais de atendimento e financeiro
+- [x] Revisar Catálogo + Estoque
+- [ ] Revisar Atendimento + Comandas + Cozinha
+- [ ] Revisar Vendas + Caixa + Financeiro
+- [ ] Revisar Eventos + Ingressos
+- [ ] Revisar Relatórios
+- [ ] Revisar Impressão
 - [ ] Fechar decisões de negócio restantes
 - [ ] Revisar modelo relacional completo
 - [ ] Definir contratos dos serviços por domínio
