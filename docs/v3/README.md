@@ -44,6 +44,8 @@ Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica d
 - [Modelo relacional organizacional](arquitetura/modelo-relacional-organizacional.md)
 - [Estratégia de RLS](arquitetura/estrategia-rls.md)
 - [Mapeamento de chaves organizacionais](arquitetura/mapeamento-chaves-organizacionais.md)
+- [Migration 008 — Movimentação e inventário transacionais](arquitetura/migration-008-movimentacao-inventario-transacional.md)
+- [Serviço V3 de estoque](arquitetura/servico-estoque-v3.md)
 
 ### Roadmap
 
