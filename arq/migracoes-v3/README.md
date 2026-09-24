@@ -84,3 +84,13 @@ Cria a RPC `registrar_baixa_estoque_v3`, com operação por unidade, bloqueio da
 A V2 ainda não chama a RPC.
 
 Documentação: `docs/v3/arquitetura/migration-007-baixa-estoque-transacional.md`.
+
+### 008 — Movimentação e inventário transacionais
+
+`008-movimentacao-inventario-transacional.sql`
+
+Prepara `registrar_movimentacoes_estoque_v3` para entradas/saídas manuais e `concluir_inventario_v3` para inventário físico. As duas operações trabalham com o saldo por unidade, bloqueio transacional e idempotência por `operacao_id`.
+
+A V2 ainda não chama essas RPCs e `produtos.estoque_atual` permanece inalterado por elas.
+
+Documentação: `docs/v3/arquitetura/migration-008-movimentacao-inventario-transacional.md`.
