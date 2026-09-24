@@ -78,8 +78,67 @@
         };
     }
 
+    async function obterSaldos(produtoIds) {
+        if (!estaAtivo()) {
+            return {
+                handled: false,
+                data: null
+            };
+        }
+
+        if (!window.estoqueServiceV3) {
+            throw new Error('Serviço de estoque V3 não carregado.');
+        }
+
+        const contexto = await obterContextoComUnidade();
+
+        const saldos = await window.estoqueServiceV3.listarSaldos({
+            unidadeId: contexto.unidadeId,
+            produtoIds
+        });
+
+        return {
+            handled: true,
+            data: saldos,
+            contexto
+        };
+    }
+
+    async function concluirInventario({
+        linhas,
+        observacao = ''
+    }) {
+        if (!estaAtivo()) {
+            return {
+                handled: false,
+                data: null
+            };
+        }
+
+        if (!window.estoqueServiceV3) {
+            throw new Error('Serviço de estoque V3 não carregado.');
+        }
+
+        const contexto = await obterContextoComUnidade();
+
+        const data = await window.estoqueServiceV3.concluirInventario({
+            unidadeId: contexto.unidadeId,
+            usuarioId: contexto.usuarioId,
+            linhas,
+            observacao
+        });
+
+        return {
+            handled: true,
+            data,
+            contexto
+        };
+    }
+
     window.estoqueAdapterV3 = {
         estaAtivo,
-        salvarMovimentacao
+        salvarMovimentacao,
+        obterSaldos,
+        concluirInventario
     };
 })();
