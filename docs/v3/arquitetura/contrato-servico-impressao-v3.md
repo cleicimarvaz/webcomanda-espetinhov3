@@ -51,3 +51,42 @@ A escolha do mecanismo de impressão fica fora da regra de negócio.
 ## PWA
 
 O comando de impressão deve poder ser acionado após reconexão quando uma operação tiver sido concluída e a saída estiver pendente.
+
+
+## Addendum — Revisão 05
+
+### Estado da impressão
+
+A impressão deve possuir identidade própria de execução, separada da operação comercial.
+
+Fluxo conceitual:
+
+`operação concluída → comando de impressão → enviado → concluído/falhou → reprocessamento`
+
+### Reimpressão
+
+Reimpressão deliberada não cria nova venda, pagamento, ingresso, fechamento ou movimentação financeira.
+
+### Idempotência
+
+O comando deve possuir identificador de operação/documento para distinguir retry de nova solicitação de impressão.
+
+### Adaptadores
+
+A aplicação deve poder alternar entre:
+
+- navegador/PDF;
+- impressora térmica;
+- adaptador Android;
+- adaptador iOS;
+- servidor/conector local futuro.
+
+A escolha do adaptador não pertence ao domínio financeiro ou de atendimento.
+
+### Dados de identidade e configuração
+
+Nome da empresa/unidade e identidade do operador devem vir do contexto autorizado. Configurações puramente de dispositivo, como largura 58/80 mm, podem permanecer locais.
+
+### Falhas
+
+Falha na impressão não desfaz a operação que originou o documento.
