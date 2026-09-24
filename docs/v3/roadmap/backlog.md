@@ -94,7 +94,7 @@
 - [x] Mapear casos de uso centrais
 - [x] Criar contratos iniciais de atendimento e financeiro
 - [x] Revisar Catálogo + Estoque
-- [ ] Revisar Atendimento + Comandas + Cozinha
+- [x] Revisar Atendimento + Comandas + Cozinha
 - [ ] Revisar Vendas + Caixa + Financeiro
 - [ ] Revisar Eventos + Ingressos
 - [ ] Revisar Relatórios
