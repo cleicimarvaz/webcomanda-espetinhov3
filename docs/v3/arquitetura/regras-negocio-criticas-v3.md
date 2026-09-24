@@ -73,8 +73,22 @@ Estas regras devem ser consideradas invariantes do sistema e, quando possível, 
 43. Auditoria deve identificar contexto organizacional quando aplicável.
 44. Auditoria de operação transacional não deve depender apenas do sucesso da UI.
 
+## Invariantes financeiros adicionais
+
+45. Uma venda e seus efeitos financeiros/estoque devem ser tratados como uma única operação quando a integridade exigir atomicidade.
+46. Uma venda fiada não pode ficar sem a conta a receber obrigatória correspondente.
+47. Um pagamento não pode ser associado a caixa de outra unidade.
+48. Uma sessão de caixa não pode receber lançamentos depois de encerrada.
+49. Encerramento local de turno não altera o estado financeiro do caixa.
+50. Um estorno não deve apagar a operação original; deve gerar efeitos compensatórios identificáveis.
+51. Recebimentos de contas a receber devem possuir histórico próprio e não depender somente de um valor acumulado mutável.
+52. Pagamentos de despesas devem possuir histórico próprio e não depender somente de um campo pago/não pago.
+53. Operações financeiras repetidas com a mesma operaçãoId não podem criar duplicidade.
+54. O valor efetivamente incorporado ao caixa deve considerar troco quando houver pagamento em dinheiro.
+55. Relatórios financeiros devem derivar seus números das fontes de verdade normalizadas, e não de campos duplicados mantidos para conveniência da UI.
+
 ## Regra de implementação
 
 Quanto mais crítica a regra, mais próxima do núcleo transacional ela deve ficar.
 
-\`UI\` pode validar para melhorar a experiência, mas \`serviço/backend/banco\` deve validar novamente.
+UI pode validar para melhorar a experiência, mas serviço/backend/banco deve validar novamente.
