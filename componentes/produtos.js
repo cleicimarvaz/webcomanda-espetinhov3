@@ -716,8 +716,77 @@ window.confirmarExclusaoProduto = function(id) {
 
 window.renderizarEstoque = async function() {
     if (typeof _supabase === 'undefined') return;
-    
-    const { data: pds } = await _supabase.from('produtos').select('*').eq('controlar_estoque', true).order('nome');
+
+    const v3Ativo = localStorage.getItem('v3_estoque_transacional') === 'true';
+    let pds = [];
+    let saldosPorProduto = new Map();
+    let unidadeNome = '';
+
+    if (v3Ativo) {
+        try {
+            if (!window.estoqueAdapterV3) {
+                throw new Error('Adaptador de estoque V3 não carregado.');
+            }
+
+            const contexto = await window.organizacaoServiceV3.obterContextoAtual();
+            let contextoFinal = contexto;
+
+            if (!contextoFinal.unidadeId && contextoFinal.unidades.length === 1) {
+                contextoFinal = await window.organizacaoServiceV3.definirUnidadeAtual(contextoFinal.unidades[0].id);
+            }
+
+            if (!contextoFinal.unidadeId) {
+                const containerSemUnidade = document.getElementById('lista-estoque');
+                if (containerSemUnidade) {
+                    containerSemUnidade.innerHTML = `
+                        <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-2xl border border-amber-100 dark:border-amber-800/50">
+                            <p class="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase italic">
+                                ${contextoFinal.unidades.length > 1
+                                    ? 'Selecione uma unidade para visualizar o estoque.'
+                                    : 'Nenhuma unidade ativa disponível para visualizar o estoque.'}
+                            </p>
+                        </div>`;
+                }
+                return;
+            }
+
+            unidadeNome = contextoFinal.unidade?.nome || '';
+
+            const { data, error } = await _supabase
+                .from('produtos')
+                .select('*')
+                .eq('controlar_estoque', true)
+                .eq('empresa_id', contextoFinal.empresaId)
+                .order('nome');
+
+            if (error) throw error;
+
+            pds = data || [];
+
+            const saldoResult = await window.estoqueAdapterV3.obterSaldos(pds.map((p) => p.id));
+            if (!saldoResult.handled) throw new Error('Não foi possível consultar os saldos V3.');
+
+            saldosPorProduto = new Map(
+                (saldoResult.data || []).map((item) => [item.produto_id, Number(item.saldo || 0)])
+            );
+        } catch (e) {
+            console.error('Erro ao carregar estoque V3:', e);
+            const containerErro = document.getElementById('lista-estoque');
+            if (containerErro) {
+                containerErro.innerHTML = '<p class="text-center text-[10px] text-red-400 py-10 font-black uppercase italic">Erro ao carregar estoque da unidade.</p>';
+            }
+            return;
+        }
+    } else {
+        const { data } = await _supabase
+            .from('produtos')
+            .select('*')
+            .eq('controlar_estoque', true)
+            .order('nome');
+
+        pds = data || [];
+    }
+
     const container = document.getElementById('lista-estoque');
     if (!container) return;
 
@@ -726,21 +795,26 @@ window.renderizarEstoque = async function() {
         return;
     }
 
-    container.innerHTML = pds.map(p => `
+    container.innerHTML = pds.map(p => {
+        const saldoAtual = v3Ativo ? (saldosPorProduto.get(p.id) || 0) : (p.estoque_atual || 0);
+        const limiteMinimo = Number(p.estoque_minimo || 5);
+
+        return `
         <div class="bg-white dark:bg-slate-900 p-4 rounded-3xl shadow-sm flex items-center justify-between border-2 border-slate-100 dark:border-slate-800 mb-2">
             <div>
                 <h4 class="font-black text-[11px] uppercase italic text-slate-800 dark:text-slate-200 leading-tight">${p.nome}</h4>
                 <div class="flex items-center gap-2 mt-1">
                     <span class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase">Qtd Atual:</span>
-                    <span class="text-[14px] font-black ${p.estoque_atual <= (p.estoque_minimo || 5) ? 'text-red-500' : 'text-emerald-500'}">${p.estoque_atual || 0}</span>
+                    <span class="text-[14px] font-black ${saldoAtual <= limiteMinimo ? 'text-red-500' : 'text-emerald-500'}">${saldoAtual}</span>
+                    ${v3Ativo && unidadeNome ? `<span class="text-[8px] font-black text-slate-300 dark:text-slate-600 uppercase">/ ${unidadeNome}</span>` : ''}
                 </div>
             </div>
-            <button onclick="abrirModalEstoque(${p.id}, '${p.nome}')" class="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-xl text-[9px] font-black uppercase border border-blue-100 dark:border-blue-800/50 active:scale-95 transition-all">
+            <button onclick="abrirModalEstoque(${p.id}, '${String(p.nome || '').replace(/'/g, "\\'")}')" class="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-xl text-[9px] font-black uppercase border border-blue-100 dark:border-blue-800/50 active:scale-95 transition-all">
                 Ajustar
             </button>
-        </div>`).join('');
+        </div>`;
+    }).join('');
 }
-
 window.abrirModalEstoque = function(id, nome) {
     document.getElementById('id-produto-movimentacao').value = id;
     document.getElementById('nome-produto-movimentacao').innerText = nome;
