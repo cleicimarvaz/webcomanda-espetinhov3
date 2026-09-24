@@ -793,6 +793,45 @@ window.salvarMovimentacao = async function() {
     if (typeof setLoading === 'function') setLoading('btn-salvar-movimentacao', true);
 
     try {
+        // ============================================================
+        // PONTE V3 (FEATURE FLAG)
+        // ============================================================
+        // Desligada por padrão para preservar o comportamento da V2.
+        // Quando ativada, a operação passa pelo serviço/RPC transacional.
+        const v3Ativo = localStorage.getItem('v3_estoque_transacional') === 'true';
+
+        if (v3Ativo) {
+            if (!window.estoqueAdapterV3) {
+                throw new Error('Adaptador de estoque V3 não carregado.');
+            }
+
+            const resultadoV3 = await window.estoqueAdapterV3.salvarMovimentacao({
+                produtoId: Number(idProd),
+                tipo,
+                quantidade: qtd,
+                motivo
+            });
+
+            if (resultadoV3?.handled) {
+                if (typeof registrarLog === 'function') {
+                    await registrarLog(
+                        'ESTOQUE',
+                        'AJUSTE MANUAL V3',
+                        `PRODUTO ID: ${idProd} | TIPO: ${tipo.toUpperCase()} | QTD: ${qtd} | MOTIVO: ${motivo} | UNIDADE: ${resultadoV3.contexto?.unidadeId || 'NÃO INFORMADA'}`
+                    );
+                }
+
+                if (typeof showToast === 'function') showToast('ESTOQUE ATUALIZADO!');
+                fecharModalEstoque();
+                if (typeof renderizarEstoque === 'function') renderizarEstoque();
+                return;
+            }
+        }
+
+        // ============================================================
+        // FLUXO LEGADO V2
+        // ============================================================
+        // Mantido como fallback enquanto a feature flag estiver desligada.
         // Buscamos o nome e o estoque atual para um log mais completo
         const { data: p, error: errP } = await _supabase.from('produtos').select('nome, estoque_atual').eq('id', idProd).single();
         if (errP) throw errP;
