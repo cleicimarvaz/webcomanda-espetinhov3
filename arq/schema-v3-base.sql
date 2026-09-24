@@ -487,9 +487,10 @@ begin
 
     -- estoque_produto_unidade não possui empresa_id: a empresa é derivada
     -- do produto e da unidade.
-    if TG_TABLE_NAME = 'estoque_movimentacoes'
-       and new.empresa_id <> v_empresa_produto then
-        raise exception 'Empresa, produto e unidade possuem contextos incompatíveis.';
+    if TG_TABLE_NAME = 'estoque_movimentacoes' then
+        if new.empresa_id <> v_empresa_produto then
+            raise exception 'Empresa, produto e unidade possuem contextos incompatíveis.';
+        end if;
     end if;
 
     return new;
