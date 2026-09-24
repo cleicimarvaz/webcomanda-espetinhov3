@@ -1,6 +1,8 @@
 # Migrações V3
 
-As migrações desta pasta são separadas do schema atual da V2. Elas representam a evolução incremental prevista para a V3.
+As migrações desta pasta são separadas do schema atual da V2. Elas representam a evolução incremental que foi planejada quando a V3 ainda seria construída sobre a base existente.
+
+A V3 agora terá um banco dedicado. Para um banco novo, use como referência inicial `arq/schema-v3-base.sql` e o bootstrap em `arq/seeds-v3/`. As migrations 001–008 ficam como histórico do caminho de transição e não devem ser aplicadas cegamente sobre o schema novo.
 
 ## Regras
 
