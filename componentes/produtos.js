@@ -887,14 +887,6 @@ window.salvarMovimentacao = async function() {
             });
 
             if (resultadoV3?.handled) {
-                if (typeof registrarLog === 'function') {
-                    await registrarLog(
-                        'ESTOQUE',
-                        'AJUSTE MANUAL V3',
-                        `PRODUTO ID: ${idProd} | TIPO: ${tipo.toUpperCase()} | QTD: ${qtd} | MOTIVO: ${motivo} | UNIDADE: ${resultadoV3.contexto?.unidadeId || 'NÃO INFORMADA'}`
-                    );
-                }
-
                 if (typeof showToast === 'function') showToast('ESTOQUE ATUALIZADO!');
                 fecharModalEstoque();
                 if (typeof renderizarEstoque === 'function') renderizarEstoque();
