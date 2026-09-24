@@ -29,11 +29,11 @@
 ## Dados
 
 - [ ] Mapear campos legados
-- [ ] Definir estratégia para produtos.estoque
-- [ ] Definir evolução de itens JSONB
-- [ ] Definir identidade relacional em registros operacionais
-- [ ] Separar configurações globais, empresariais, por unidade e por usuário
-- [ ] Definir Storage público/privado/backup
+- [x] Definir estratégia para produtos.estoque
+- [x] Definir evolução de itens JSONB
+- [x] Definir identidade relacional em registros operacionais
+- [x] Separar configurações globais, empresariais, por unidade e por usuário
+- [x] Definir Storage público/privado/backup
 
 ## Operações críticas
 
@@ -102,7 +102,7 @@
 - [x] Revisar Relatórios
 - [x] Revisar Impressão
 - [x] Fechar decisões de negócio restantes
-- [ ] Revisar modelo relacional completo
+- [x] Revisar modelo relacional completo
 - [x] Definir contratos dos serviços por domínio
 - [ ] Consolidar SQL final do banco
 
@@ -119,3 +119,8 @@ O banco V3 permanece como etapa final.
 Em 2026-09-24 foi criado o ADR-004, consolidando as decisões funcionais abertas dos domínios de catálogo, estoque, atendimento, vendas, financeiro, eventos, ingressos, relatórios e impressão.
 
 O próximo passo da modelagem é revisar o modelo relacional completo com base nessas decisões. O banco V3 continua como etapa final.
+
+
+## Atualização — Revisão 06
+
+A Revisão 06 consolidou as consequências do ADR-004 no modelo relacional. Foram explicitados lote de ingresso, transferência de ingresso, portarias, histórico de impressão, múltiplos códigos de barras, recebimento entre unidades, arquivos e a distinção entre mesa de atendimento e mesa de evento.
