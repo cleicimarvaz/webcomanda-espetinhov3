@@ -15,8 +15,8 @@
     'use strict';
 
     function exigirSupabase() {
-        if (typeof _supabase === 'undefined') {
-            throw new Error('Supabase não inicializado.');
+        if (typeof _supabaseV3 === 'undefined' || !_supabaseV3) {
+            throw new Error('Banco V3 não inicializado.');
         }
     }
 
@@ -72,7 +72,7 @@
             throw new Error('motivo é obrigatório.');
         }
 
-        const { data, error } = await _supabase.rpc('registrar_movimentacoes_estoque_v3', {
+        const { data, error } = await _supabaseV3.rpc('registrar_movimentacoes_estoque_v3', {
             p_unidade_id: unidadeId,
             p_usuario_id: Number(usuarioId),
             p_tipo: tipoNormalizado,
@@ -150,7 +150,7 @@
             contagem_fisica: Number(linha.contagem_fisica)
         }));
 
-        const { data, error } = await _supabase.rpc('concluir_inventario_v3', {
+        const { data, error } = await _supabaseV3.rpc('concluir_inventario_v3', {
             p_unidade_id: unidadeId,
             p_usuario_id: Number(usuarioId),
             p_linhas: linhasNormalizadas,
