@@ -99,9 +99,16 @@
 - [x] Revisar Atendimento + Comandas + Cozinha
 - [x] Revisar Vendas + Caixa + Financeiro
 - [x] Revisar Eventos + Ingressos
-- [ ] Revisar Relatórios
-- [ ] Revisar Impressão
+- [x] Revisar Relatórios
+- [x] Revisar Impressão
 - [ ] Fechar decisões de negócio restantes
 - [ ] Revisar modelo relacional completo
-- [ ] Definir contratos dos serviços por domínio
+- [x] Definir contratos dos serviços por domínio
 - [ ] Consolidar SQL final do banco
+
+
+## Atualização — Revisão 05
+
+Foram concluídas as revisões de Relatórios + Impressão e criado o contrato do serviço de relatórios. O contrato de impressão também foi refinado para separar operação comercial, execução de impressão, reimpressão, idempotência e adaptadores por dispositivo.
+
+O banco V3 permanece como etapa final.
