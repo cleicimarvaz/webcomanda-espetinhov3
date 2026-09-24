@@ -738,24 +738,11 @@ evento N:N patrocinador via evento_patrocinadores
 ### Configuração
 - configuracoes_sistema
 
-## 21. Pontos que ainda dependem de decisão
+## 21. Status das decisões
 
-A modelagem foi construída para manter as alternativas abertas onde possível.
+As decisões funcionais foram consolidadas no ADR-004 — Fechamento das decisões de negócio da V3. As consequências estruturais adicionais estão registradas na Revisão 06 do modelo relacional.
 
-Ainda precisam ser fechados antes do SQL definitivo:
-1. preço empresarial, preço por unidade ou ambos;
-2. cliente compartilhado por empresa;
-3. fornecedor compartilhado por empresa;
-4. despesa corporativa;
-5. meta consolidada e/ou por unidade;
-6. evento corporativo e/ou por unidade;
-7. regras de transferência entre unidades;
-8. necessidade de cadastro formal de mesas no atendimento comum;
-9. pagamento dividido;
-10. regras de cancelamento e estorno de itens;
-11. estoque de combos e composição;
-12. política de anexos/arquivos;
-13. quais configurações realmente precisam persistir no banco.
+O SQL definitivo ainda não foi consolidado porque a modelagem física, constraints, índices, funções, RLS e Storage precisam ser revisados em conjunto.
 
 ## 22. Regra para o banco final
 
