@@ -165,7 +165,7 @@
         }
 
         const dados = await listarVinculos();
-        const unidade = dados.unidades.find((item) => item.id === unidadeId);
+        const unidade = dados.unidades.find((item) => String(item.id) === String(unidadeId));
 
         if (!unidade) {
             throw new Error('A unidade selecionada não está disponível para este usuário.');
