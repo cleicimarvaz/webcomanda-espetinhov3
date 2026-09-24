@@ -792,3 +792,28 @@ Estas decisões agora podem ser usadas como base para:
 5. fechamento do SQL físico V3.
 
 O banco V3 continua sem criação física nesta etapa.
+
+
+## Addendum — mesa no atendimento comum
+
+Para evitar ambiguidade entre mesa de atendimento e mesa de evento, fica registrado:
+
+- a primeira entrega da V3 **não terá cadastro formal de mesas no atendimento comum**;
+- a mesa/comanda comum será um identificador visível da sessão de atendimento;
+- esse identificador precisa ser único enquanto a sessão estiver ativa na unidade;
+- após o fechamento, o identificador poderá ser reutilizado;
+- mesas de evento são diferentes e continuam representadas por EVENTO_MESAS.
+
+## Addendum — pontos estruturais decorrentes
+
+Também ficam consolidados como consequências do ADR-004:
+
+- produto pode possuir vários códigos de barras;
+- ingresso usa TIPO + LOTE;
+- transferência de ingresso possui histórico próprio;
+- evento suporta múltiplas portarias/dispositivos;
+- impressão possui histórico próprio;
+- arquivos possuem metadados rastreáveis;
+- recebimento de conta pode ocorrer em unidade diferente da unidade de origem.
+
+Esses pontos devem aparecer no modelo relacional final e no SQL definitivo.
