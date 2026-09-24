@@ -13,8 +13,8 @@
     const STORAGE_KEY_UNIDADE = 'v3_unidade_id_atual';
 
     function exigirSupabase() {
-        if (typeof _supabase === 'undefined' || !_supabase) {
-            throw new Error('Supabase não inicializado.');
+        if (typeof _supabaseV3 === 'undefined' || !_supabaseV3) {
+            throw new Error('Banco V3 não inicializado.');
         }
     }
 
@@ -39,7 +39,7 @@
 
         const usuarioId = obterUsuarioId();
 
-        const { data: membros, error: erroMembros } = await _supabase
+        const { data: membros, error: erroMembros } = await _supabaseV3
             .from('membros_organizacao')
             .select('id, empresa_id, unidade_id, papel_id, ativo')
             .eq('usuario_id', usuarioId)
@@ -66,7 +66,7 @@
 
         // Vínculo direto: somente as unidades explicitamente vinculadas.
         if (unidadeIdsDiretas.length > 0) {
-            const { data, error } = await _supabase
+            const { data, error } = await _supabaseV3
                 .from('unidades')
                 .select('id, empresa_id, nome, status')
                 .in('id', unidadeIdsDiretas)
@@ -81,7 +81,7 @@
 
         // Escopo empresarial: todas as unidades ativas da empresa.
         if (empresasComEscopoGlobal.length > 0) {
-            const { data, error } = await _supabase
+            const { data, error } = await _supabaseV3
                 .from('unidades')
                 .select('id, empresa_id, nome, status')
                 .in('empresa_id', empresasComEscopoGlobal)
