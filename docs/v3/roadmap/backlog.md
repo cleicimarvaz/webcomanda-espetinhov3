@@ -35,7 +35,7 @@
 
 - [ ] Contrato do serviço de venda
 - [ ] Serviço de venda
-- [ ] Contrato do serviço de fechamento de comanda
+- [x] Contrato do serviço de fechamento de comanda
 - [ ] Serviço de fechamento de comanda
 - [ ] Serviço de baixa de estoque
 - [ ] Serviço de caixa
@@ -86,6 +86,8 @@
 - [x] Mapear relações entre os domínios
 - [x] Definir fontes de verdade iniciais
 - [x] Mapear estruturas da V2 para a V3
+- [x] Mapear casos de uso centrais
+- [x] Criar contratos iniciais de atendimento e financeiro
 - [ ] Fechar decisões de negócio restantes
 - [ ] Revisar modelo relacional completo
 - [ ] Definir contratos dos serviços por domínio
