@@ -48,21 +48,55 @@
         if (erroMembros) throw erroMembros;
 
         const vinculos = membros || [];
-        const unidadeIds = [...new Set(vinculos.map((m) => m.unidade_id).filter(Boolean))];
 
-        let unidades = [];
+        const unidadeIdsDiretas = [
+            ...new Set(vinculos.map((m) => m.unidade_id).filter(Boolean))
+        ];
 
-        if (unidadeIds.length > 0) {
+        const empresasComEscopoGlobal = [
+            ...new Set(
+                vinculos
+                    .filter((m) => !m.unidade_id)
+                    .map((m) => m.empresa_id)
+                    .filter(Boolean)
+            )
+        ];
+
+        const unidadesPorId = new Map();
+
+        // Vínculo direto: somente as unidades explicitamente vinculadas.
+        if (unidadeIdsDiretas.length > 0) {
             const { data, error } = await _supabase
                 .from('unidades')
                 .select('id, empresa_id, nome, status')
-                .in('id', unidadeIds)
+                .in('id', unidadeIdsDiretas)
                 .eq('status', 'ativa')
                 .order('nome');
 
             if (error) throw error;
-            unidades = data || [];
+            for (const unidade of data || []) {
+                unidadesPorId.set(unidade.id, unidade);
+            }
         }
+
+        // Escopo empresarial: todas as unidades ativas da empresa.
+        if (empresasComEscopoGlobal.length > 0) {
+            const { data, error } = await _supabase
+                .from('unidades')
+                .select('id, empresa_id, nome, status')
+                .in('empresa_id', empresasComEscopoGlobal)
+                .eq('status', 'ativa')
+                .order('nome');
+
+            if (error) throw error;
+            for (const unidade of data || []) {
+                unidadesPorId.set(unidade.id, unidade);
+            }
+        }
+
+        const unidades = [...unidadesPorId.values()].sort((a, b) =>
+            String(a.nome || '').localeCompare(String(b.nome || ''))
+        );
 
         return {
             usuarioId,
