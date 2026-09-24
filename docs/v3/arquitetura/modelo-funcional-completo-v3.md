@@ -800,3 +800,38 @@ Uma venda pode gerar vários ingressos individuais. Cada ingresso mantém códig
 - `solicitacao_ingresso_itens`.
 
 Essas entidades representam a intenção pública antes da emissão quando houver confirmação financeira posterior.
+
+
+## ADDENDUM REVISAO 06 — Entidades decorrentes do fechamento funcional
+
+Para refletir integralmente o ADR-004, o modelo funcional passa a considerar também:
+
+### Catálogo
+
+PRODUTO_CODIGOS_BARRAS — um produto pode possuir vários códigos de barras.
+
+### Eventos e ingressos
+
+LOTES_INGRESSO — lote vendável ligado ao tipo de ingresso, com preço, limite e janela de venda.
+
+TRANSFERENCIAS_INGRESSO — histórico de troca de titularidade.
+
+PORTARIAS_EVENTO — portarias/dispositivos autorizados para validação.
+
+### Transversal
+
+ARQUIVOS — metadados de arquivos associados ao negócio e ao Storage.
+
+IMPRESSOES — histórico das tentativas de impressão e reimpressões.
+
+### Atendimento
+
+Não será criado cadastro formal de mesas para o atendimento comum na primeira entrega. Mesa é um identificador visível da sessão de comanda. Mesas de eventos são diferentes e possuem entidade própria.
+
+### Recebimento
+
+CONTAS_RECEBER_PAGAMENTOS registra a unidade e o caixa onde o recebimento aconteceu, mesmo quando a conta foi criada originalmente em outra unidade.
+
+### Regra
+
+Essas entidades passam a fazer parte da base de referência para o modelo físico final.
