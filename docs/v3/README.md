@@ -48,6 +48,7 @@ Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica d
 - [Serviço V3 de estoque](arquitetura/servico-estoque-v3.md)
 - [Serviço V3 de contexto organizacional](arquitetura/servico-contexto-organizacional-v3.md)
 - [Configuração e cliente do banco V3](decisoes/ADR-003-banco-dados-v3-separado.md)
+- [Tela de configuração do banco V3](arquitetura/configuracao-banco-v3.md)
 - [Teste das operações transacionais de estoque](arquitetura/teste-estoque-transacional.md)
 - [Integração gradual da movimentação manual V3](arquitetura/integracao-movimentacao-manual-v3.md)
 
