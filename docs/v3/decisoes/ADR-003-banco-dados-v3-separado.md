@@ -36,11 +36,11 @@ Os serviços novos devem usar `_supabaseV3` e não `_supabase`.
 
 No navegador deve ser usada somente a chave pública/publishable do projeto.
 
-Não será colocado no frontend nenhum segredo ou chave `service_role`/`secret`, pois essas chaves possuem privilégios elevados e podem ignorar RLS. citeturn181589search0turn181589search5
+Não será colocado no frontend nenhum segredo ou chave `service_role`/`secret`, pois essas chaves possuem privilégios elevados e podem ignorar RLS.
 
 ### Sobre reutilizar a chave da V2
 
-A chave de API do Supabase identifica o projeto que recebe a requisição. A URL da API também é específica do projeto. Portanto, uma chave da V2 não pode ser usada para autenticar um projeto Supabase diferente. citeturn181589search0turn181589search2
+A chave de API do Supabase identifica o projeto que recebe a requisição. A URL da API também é específica do projeto. Portanto, uma chave da V2 não pode ser usada para autenticar um projeto Supabase diferente.
 
 Assim, existem dois cenários:
 
