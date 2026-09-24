@@ -162,7 +162,7 @@ window.abrirConfigEspecifica = function(t) {
 }
 
 window.voltarMenuConfig = function() {
-    ['view-cfg-ticket', 'view-cfg-auditoria', 'view-cfg-usuarios', 'view-cfg-backup', 'view-cfg-utilitarios', 'view-cfg-ordem-categorias', 'view-cfg-perigo'].forEach(i =>
+    ['view-cfg-ticket', 'view-cfg-auditoria', 'view-cfg-usuarios', 'view-cfg-backup', 'view-cfg-utilitarios', 'view-cfg-ordem-categorias', 'view-cfg-banco-v3', 'view-cfg-perigo'].forEach(i =>
         document.getElementById(i)?.classList.add('hidden')
     );
     document.getElementById('menu-config-cards')?.classList.remove('hidden');
