@@ -129,6 +129,19 @@ Uma requisição precisa ser limitada por identidade e contexto organizacional. 
 
 As policies devem acompanhar as relações de empresa, unidade, usuário e papel.
 
+## Bancos durante a transição
+
+A V2 e a V3 terão clientes de banco separados durante a transição.
+
+- V2: `window._supabase`;
+- V3: `window._supabaseV3`.
+
+A configuração do banco V3 fica em `componentes/config-v3.js`, e a inicialização em `componentes/database-v3.js`.
+
+O banco V3 será preparado independentemente do banco operacional da V2. Isso permite validar o novo modelo sem colocar em risco os dados da versão em uso.
+
+A chave usada no navegador deve ser uma chave pública/publishable do projeto correspondente. Uma chave de um projeto Supabase diferente não autentica outro projeto; URL e chave precisam corresponder ao mesmo projeto.
+
 ## Migração do banco atual
 
 A migração deve ocorrer em etapas:
