@@ -15,3 +15,6 @@ Antes de uma mudança estrutural relevante, registrar:
 ## Regra
 
 A documentação não substitui testes. Uma decisão registrada deve ser acompanhada de evidência quando a implementação começar.
+## ADRs recentes
+
+- [ADR-003 — Banco de dados dedicado para a V3](ADR-003-banco-dados-v3-separado.md)
