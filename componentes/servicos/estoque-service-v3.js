@@ -88,6 +88,35 @@
         return data;
     }
 
+    async function listarSaldos({ unidadeId, produtoIds }) {
+        exigirSupabase();
+        validarContexto(unidadeId, 0);
+
+        if (!Array.isArray(produtoIds) || produtoIds.length === 0) {
+            return [];
+        }
+
+        const ids = produtoIds
+            .map((id) => Number(id))
+            .filter((id) => Number.isInteger(id) && id > 0);
+
+        if (ids.length === 0) {
+            return [];
+        }
+
+        const { data, error } = await _supabase
+            .from('estoque_produto_unidade')
+            .select('produto_id, unidade_id, saldo, updated_at')
+            .eq('unidade_id', unidadeId)
+            .in('produto_id', ids);
+
+        if (error) {
+            throw error;
+        }
+
+        return data || [];
+    }
+
     async function registrarEntrada(args) {
         return registrarMovimentacoes({
             ...args,
@@ -141,6 +170,7 @@
         registrarMovimentacoes,
         registrarEntrada,
         registrarSaida,
+        listarSaldos,
         concluirInventario
     };
 })();
