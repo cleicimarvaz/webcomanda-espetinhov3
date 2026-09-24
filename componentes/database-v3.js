@@ -9,46 +9,99 @@
 
 window._supabaseV3 = null;
 
-function notificarErroBancoV3(mensagem) {
-    console.error('❌ [DATABASE V3]:', mensagem);
-
-    if (typeof window.showToast === 'function') {
-        window.showToast(mensagem, 'erro');
-    }
-}
-
-try {
-    if (typeof supabase === 'undefined') {
-        throw new Error('Biblioteca Supabase (CDN) não encontrada.');
+function obterConfigBancoV3() {
+    if (!window.WEBCOMANDA_V3_CONFIG) {
+        throw new Error('Configuração do banco V3 não carregada.');
     }
 
-    if (
-        typeof SUPABASE_V3_URL !== 'string' ||
-        !SUPABASE_V3_URL ||
-        SUPABASE_V3_URL.includes('COLOQUE_A_URL')
-    ) {
+    const config = window.WEBCOMANDA_V3_CONFIG.obter();
+
+    if (!config.url) {
         throw new Error('URL do banco V3 ainda não configurada.');
     }
 
-    if (
-        typeof SUPABASE_V3_KEY !== 'string' ||
-        !SUPABASE_V3_KEY ||
-        SUPABASE_V3_KEY.includes('COLOQUE_A_CHAVE')
-    ) {
+    if (!config.key) {
         throw new Error('Chave pública do banco V3 ainda não configurada.');
     }
 
-    window._supabaseV3 = supabase.createClient(
-        SUPABASE_V3_URL,
-        SUPABASE_V3_KEY
-    );
-
-    console.log('✅ [DATABASE V3] Cliente Supabase V3 inicializado.');
-} catch (err) {
-    console.warn('⚠️ [DATABASE V3] Banco V3 ainda não configurado:', err.message);
-    notificarErroBancoV3('Banco V3 ainda não configurado.');
+    return config;
 }
+
+function validarUrlSupabaseV3(url) {
+    try {
+        const parsed = new URL(url);
+        return parsed.protocol === 'https:' && parsed.hostname.endsWith('.supabase.co');
+    } catch (e) {
+        return false;
+    }
+}
+
+async function inicializarBancoV3({ silencioso = false } = {}) {
+    try {
+        if (typeof supabase === 'undefined') {
+            throw new Error('Biblioteca Supabase (CDN) não encontrada.');
+        }
+
+        const config = obterConfigBancoV3();
+
+        if (!validarUrlSupabaseV3(config.url)) {
+            throw new Error('URL do banco V3 inválida.');
+        }
+
+        if (!config.key) {
+            throw new Error('Chave pública do banco V3 vazia.');
+        }
+
+        window._supabaseV3 = supabase.createClient(
+            config.url,
+            config.key
+        );
+
+        if (!silencioso) {
+            console.log('✅ [DATABASE V3] Cliente Supabase V3 inicializado.');
+        }
+
+        return {
+            ok: true,
+            url: config.url
+        };
+    } catch (err) {
+        window._supabaseV3 = null;
+
+        if (!silencioso) {
+            console.warn('⚠️ [DATABASE V3] Não inicializado:', err.message);
+        }
+
+        return {
+            ok: false,
+            error: err
+        };
+    }
+}
+
+window.inicializarBancoV3 = inicializarBancoV3;
+
+window.reconectarBancoV3 = async function () {
+    return inicializarBancoV3({ silencioso: true });
+};
 
 window.isDatabaseV3Ready = function () {
     return window._supabaseV3 !== null;
 };
+
+window.obterStatusBancoV3 = function () {
+    const config = window.WEBCOMANDA_V3_CONFIG?.obter?.() || {
+        url: '',
+        key: ''
+    };
+
+    return {
+        configurado: Boolean(config.url && config.key),
+        url: config.url,
+        clienteInicializado: window._supabaseV3 !== null
+    };
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarBancoV3({ silencioso: true });
+});
