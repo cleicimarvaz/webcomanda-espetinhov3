@@ -128,6 +128,9 @@ begin
         raise exception 'operacao_id é obrigatório.';
     end if;
 
+    -- Serializa tentativas concorrentes que reutilizem a mesma chave de operação.
+    perform pg_advisory_xact_lock(hashtextextended(p_operacao_id::text, 0));
+
     if p_itens is null or jsonb_typeof(p_itens) <> 'array' then
         raise exception 'p_itens deve ser um array JSON.';
     end if;
@@ -339,6 +342,9 @@ begin
     if p_operacao_id is null then
         raise exception 'operacao_id é obrigatório.';
     end if;
+
+    -- Serializa tentativas concorrentes que reutilizem a mesma chave de operação.
+    perform pg_advisory_xact_lock(hashtextextended(p_operacao_id::text, 0));
 
     if p_linhas is null or jsonb_typeof(p_linhas) <> 'array' then
         raise exception 'p_linhas deve ser um array JSON.';
