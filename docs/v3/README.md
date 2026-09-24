@@ -47,6 +47,7 @@ Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica d
 - [Migration 008 — Movimentação e inventário transacionais](arquitetura/migration-008-movimentacao-inventario-transacional.md)
 - [Serviço V3 de estoque](arquitetura/servico-estoque-v3.md)
 - [Serviço V3 de contexto organizacional](arquitetura/servico-contexto-organizacional-v3.md)
+- [Configuração e cliente do banco V3](decisoes/ADR-003-banco-dados-v3-separado.md)
 - [Teste das operações transacionais de estoque](arquitetura/teste-estoque-transacional.md)
 - [Integração gradual da movimentação manual V3](arquitetura/integracao-movimentacao-manual-v3.md)
 
@@ -61,6 +62,7 @@ Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica d
 - [Registro de decisões](decisoes/README.md)
 - [ADR-001 — Modelo organizacional](decisoes/ADR-001-modelo-organizacional.md)
 - [ADR-002 — Modelo relacional organizacional](decisoes/ADR-002-modelo-relacional-organizacional.md)
+- [ADR-003 — Banco de dados dedicado para a V3](decisoes/ADR-003-banco-dados-v3-separado.md)
 - [Decisões de negócio pendentes](decisoes/decisoes-pendentes-negocio.md)
 - [Migration 002 — Backfill organizacional](arquitetura/migration-002-backfill-organizacional.md)
 
