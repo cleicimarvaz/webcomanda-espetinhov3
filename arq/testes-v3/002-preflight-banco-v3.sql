@@ -1,8 +1,9 @@
 -- WebComanda Espetinho V3
 -- PRE-FLIGHT DO BANCO V3
 -- Somente leitura. Não altera dados, schema, RLS ou configurações.
--- Execute depois de aplicar arq/schema-v3-base.sql e, opcionalmente,
--- arq/seeds-v3/001-bootstrap-administrativo.sql.
+-- Execute depois de aplicar arq/schema-v3-base.sql e
+-- arq/funcoes-v3/001-estoque-transacional.sql.
+-- O bootstrap administrativo é opcional para esta validação.
 
 -- 1. Tabelas fundamentais
 WITH esperadas(nome) AS (
