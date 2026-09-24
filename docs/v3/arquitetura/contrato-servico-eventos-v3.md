@@ -453,3 +453,44 @@ O contrato continua aguardando:
 - múltiplas portarias.
 
 Nenhuma dessas pendências deve ser cristalizada no banco antes do fechamento da modelagem.
+
+
+## ADDENDUM REVISAO 06 — Contrato após decisões fechadas
+
+As decisões funcionais do ADR-004 agora estão incorporadas ao contrato.
+
+### Lotes de ingresso
+
+A emissão usa o encadeamento:
+
+EVENTO → TIPO_INGRESSO → LOTE_INGRESSO → INGRESSO
+
+O lote valida preço, limite, janela de venda e status.
+
+### Reserva
+
+Reserva pública pendente usa retenção padrão de 30 minutos, com possibilidade de configuração diferente por evento.
+
+A reserva deve congelar o valor praticado, inclusive quando as mesas possuem preços diferentes.
+
+### Transferência
+
+Transferência de ingresso é operação própria, anterior ao início da operação do evento, preservando o histórico do titular.
+
+### Reentrada
+
+Reentrada somente ocorre quando habilitada no evento e respeita o limite configurado.
+
+### Portaria
+
+O serviço suporta múltiplas portarias/dispositivos. Na primeira entrega, validação exige conectividade com a fonte oficial.
+
+### Pagamento e caixa
+
+Venda interna de ingresso com pagamento imediato exige caixa aberto. Venda pública com confirmação manual de pagamento digital não depende de caixa operacional.
+
+### Pendências removidas
+
+O ciclo do evento, prazo de reserva, tipo/lote, janela de venda, cancelamento, reentrada, transferência, confirmação manual, regra de caixa, permissões e múltiplas portarias foram consolidados no ADR-004.
+
+Nenhum desses pontos permanece como decisão funcional aberta.
