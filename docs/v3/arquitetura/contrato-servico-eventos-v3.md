@@ -2,57 +2,454 @@
 
 ## Responsabilidade
 
-Concentrar as regras de eventos, reservas, mesas, ingressos e validação pública.
+Concentrar as regras de eventos, mesas, reservas, patrocinadores, tipos/lotes de ingresso, solicitações públicas, emissão, cancelamento e validação.
 
-## Evento
+O serviço não deve ser substituído por consultas diretas da UI às tabelas do domínio.
 
-Operações:
+---
+
+## 1. Contexto
+
+Toda operação administrativa recebe contexto:
+
+```text
+usuarioId
+empresaId
+unidadeId (quando aplicável)
+sessaoId
+operacaoId
+```
+
+O serviço valida o vínculo do usuário antes da operação.
+
+Evento corporativo pode ter `unidadeId = null`.
+
+---
+
+## 2. Evento
+
+Operações previstas:
+
 - criar;
 - editar;
-- ativar/finalizar/cancelar;
-- configurar mesas;
-- configurar períodos e regras de ingresso;
-- publicar dados públicos.
+- publicar;
+- abrir/encerrar vendas, quando aplicável;
+- encerrar evento;
+- cancelar;
+- consultar.
 
-## Reserva
+Regras:
+
+- pertence a uma empresa;
+- unidade é opcional conforme escopo do negócio;
+- publicação é diferente de simples existência do cadastro;
+- alterações relevantes são auditadas.
+
+---
+
+## 3. Mesas
 
 Operações:
+
+- criar mesa;
+- alterar mesa;
+- inativar mesa;
+- listar disponibilidade.
+
+Cada mesa possui identidade própria dentro do evento.
+
+A quantidade de mesas deve ser derivada das mesas cadastradas.
+
+Não usar JSONB como fonte de ocupação.
+
+---
+
+## 4. Reserva
+
+Entrada conceitual:
+
+```js
+{
+  eventoId,
+  clienteId?,
+  clienteSnapshot?,
+  mesas: [{ eventoMesaId }],
+  tipoReserva,
+  valorUnitario?,
+  observacao?,
+  operacaoId
+}
+```
+
+Operações:
+
+- criar;
 - solicitar;
-- aprovar/confirmar;
+- confirmar;
 - cancelar;
-- associar mesas;
-- registrar comprovante;
-- notificar quando aplicável.
-
-## Ingresso
-
-Operações:
-- criar tipo;
-- emitir;
-- cancelar;
-- validar;
+- expirar;
 - consultar histórico.
 
-## Concorrência
+A associação de várias mesas deve ocorrer na mesma operação.
 
-A emissão deve proteger limites de lote.
+A mesma mesa não pode ser reservada duas vezes em estados incompatíveis.
 
-A validação deve executar uma operação atômica do tipo:
+---
 
-\`pendente/confirmado → utilizado\`
+## 5. Reserva pendente
 
-sem permitir que duas leituras concorrentes consumam o mesmo ingresso.
+Quando o fluxo usar `pendente`, o serviço deve considerar:
 
-## Público
+- prazo de validade, se houver;
+- estado da mesa;
+- conflito com outra reserva;
+- confirmação ou cancelamento.
 
-O visitante deve receber somente os dados necessários para:
+A regra exata de expiração é funcional e permanece aberta.
+
+---
+
+## 6. Valor da reserva
+
+O valor praticado precisa ser preservado.
+
+Uma alteração posterior do cadastro do evento não pode mudar o valor histórico de uma reserva/venda já registrada.
+
+Receita do evento deve ser reconstruída a partir das fontes financeiras normalizadas.
+
+---
+
+## 7. Patrocinadores
+
+Operações:
+
+- cadastrar;
+- vincular ao evento;
+- alterar vínculo;
+- encerrar vínculo;
+- consultar.
+
+Patrocinador deve ser entidade reutilizável.
+
+O vínculo evento-patrocinador pode guardar atributos próprios da participação.
+
+---
+
+## 8. Tipo/lote de ingresso
+
+Operações:
+
+- criar;
+- editar;
+- ativar/inativar;
+- consultar;
+- encerrar vendas.
+
+O contrato deve suportar, conforme a decisão funcional, tanto tipo simples quanto modelo com lotes.
+
+Cada opção vendável deve possuir:
+
+- preço;
+- limite;
+- período de venda;
+- status.
+
+---
+
+## 9. Limite de ingressos
+
+A emissão deve ser transacional.
+
+Fluxo conceitual:
+
+1. validar evento;
+2. validar tipo/lote;
+3. proteger estoque de ingressos;
+4. reservar a quantidade;
+5. executar venda/pagamento quando aplicável;
+6. emitir ingressos;
+7. registrar auditoria.
+
+A mesma `operacaoId` não pode gerar ingressos duplicados.
+
+---
+
+## 10. Solicitação pública
+
+Quando o negócio usar solicitação antes do pagamento:
+
+`solicitação → confirmação financeira → emissão`
+
+A solicitação representa intenção/pendência, e não necessariamente um ingresso válido.
+
+O serviço deve poder:
+
+- criar solicitação;
+- atualizar dados permitidos;
+- confirmar;
+- cancelar;
+- expirar.
+
+O visitante público não recebe permissões administrativas.
+
+---
+
+## 11. Emissão de ingressos
+
+Cada ingresso emitido possui:
+
+- evento;
+- tipo/lote;
+- código único;
+- comprador;
+- valor praticado;
+- venda de origem, quando aplicável;
+- status;
+- datas.
+
+Uma venda pode gerar vários ingressos.
+
+O código do ingresso deve ser não previsível e único.
+
+---
+
+## 12. Venda de ingresso
+
+Quando houver cobrança:
+
+`venda → venda_itens → venda_pagamentos`
+
+Os ingressos devem apontar para a venda de origem.
+
+A confirmação financeira deve respeitar o contrato dos serviços de venda e financeiro.
+
+O módulo de eventos não deve manter um ledger financeiro paralelo.
+
+---
+
+## 13. Pagamento manual
+
+Caso o negócio utilize confirmação manual, o serviço deve registrar a confirmação como operação financeira definida pelo domínio.
+
+Alterar apenas `status = confirmado` sem preservar a origem financeira não é suficiente para a V3.
+
+---
+
+## 14. Cancelamento
+
+Um ingresso pode ser cancelado somente em estados permitidos.
+
+Regras mínimas:
+
+- utilizado não volta silenciosamente a válido;
+- cancelamento não apaga o registro;
+- efeito financeiro, quando houver, passa pelo serviço financeiro;
+- operação é auditada.
+
+---
+
+## 15. Validação de ingresso
+
+Entrada:
+
+```js
+{
+  codigo,
+  eventoId?,
+  usuarioId,
+  dispositivoId?,
+  portariaId?,
+  operacaoId
+}
+```
+
+O serviço deve:
+
+1. localizar o ingresso pelo código;
+2. bloquear/validar o registro de forma transacional;
+3. conferir evento e status;
+4. registrar a tentativa;
+5. se válido, executar `confirmado → utilizado`;
+6. retornar o resultado oficial.
+
+---
+
+## 16. Resultados de validação
+
+O contrato deve distinguir pelo menos:
+
+- válido e consumido agora;
+- já utilizado;
+- cancelado;
+- pagamento pendente;
+- código inexistente;
+- evento incompatível;
+- evento encerrado;
+- erro técnico.
+
+A UI apenas apresenta o resultado.
+
+---
+
+## 17. Histórico de validação
+
+Cada tentativa relevante gera:
+
+`validacoes_ingresso`
+
+com:
+
+- ingresso;
+- resultado;
+- usuário;
+- dispositivo/gate;
+- data;
+- motivo;
+- operação.
+
+Uma segunda leitura do mesmo ingresso deve aparecer como tentativa rejeitada, não como segundo consumo.
+
+---
+
+## 18. Concorrência
+
+Devem existir proteções para:
+
+- duas reservas da mesma mesa;
+- duas emissões sobre o limite do tipo/lote;
+- duas validações do mesmo ingresso;
+- retries da mesma operação;
+- cancelamento concorrente com validação.
+
+Essas regras devem ser resolvidas no serviço/banco.
+
+---
+
+## 19. Público
+
+O fluxo público pode:
+
 - consultar evento publicado;
-- escolher ingresso/reserva permitida;
-- enviar informações necessárias;
-- acompanhar o próprio pedido.
+- consultar ofertas públicas;
+- iniciar solicitação;
+- informar dados do comprador;
+- consultar o próprio resultado, quando houver mecanismo seguro.
 
-Operações administrativas ficam fora do fluxo público.
+O fluxo público não pode:
 
-## Auditoria
+- alterar evento;
+- confirmar pagamento;
+- cancelar operação administrativa;
+- validar ingresso;
+- acessar dados administrativos de outros compradores.
 
-Registrar criação, alterações sensíveis, confirmações, cancelamentos, emissão e validação.
+---
+
+## 20. Impressão
+
+A impressão é disparada depois da operação aplicável.
+
+O comando pode conter:
+
+- ingresso;
+- evento;
+- QR;
+- layout;
+- largura;
+- destino;
+- configuração do dispositivo.
+
+Falha de impressão não desfaz a emissão.
+
+---
+
+## 21. Notificações
+
+Notificações são efeitos posteriores.
+
+Exemplo:
+
+`pagamento confirmado → notificação`
+
+Falha de WhatsApp/e-mail não desfaz a operação principal.
+
+---
+
+## 22. Auditoria
+
+Operações sensíveis devem registrar:
+
+- ator;
+- empresa;
+- unidade, quando aplicável;
+- operaçãoId;
+- entidade;
+- antes/depois;
+- resultado;
+- data/hora.
+
+A auditoria transacional não deve depender exclusivamente de uma chamada posterior feita pela UI.
+
+---
+
+## 23. Idempotência
+
+Todas as operações que geram efeito devem aceitar uma `operacaoId`.
+
+Retry deve devolver o resultado original quando a operação já tiver sido concluída.
+
+Exemplos:
+
+- emitir ingressos;
+- confirmar pagamento;
+- cancelar;
+- validar;
+- reservar mesas.
+
+---
+
+## 24. Resposta padrão
+
+O serviço deve retornar estrutura previsível:
+
+```js
+{
+  ok: true,
+  data: {...},
+  operacaoId,
+  avisos: []
+}
+```
+
+ou:
+
+```js
+{
+  ok: false,
+  codigo: "...",
+  mensagem: "...",
+  operacaoId
+}
+```
+
+A UI não deve interpretar mensagens livres como regra de negócio.
+
+---
+
+## 25. Decisões funcionais pendentes
+
+O contrato continua aguardando:
+
+- ciclo oficial do evento;
+- prazo da reserva pendente;
+- tipo/lote;
+- janela de venda;
+- política de cancelamento;
+- reentrada;
+- transferência;
+- integração de pagamento público;
+- obrigatoriedade de caixa;
+- permissões específicas;
+- múltiplas portarias.
+
+Nenhuma dessas pendências deve ser cristalizada no banco antes do fechamento da modelagem.
