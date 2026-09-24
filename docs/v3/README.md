@@ -46,6 +46,7 @@ Esta fase é de **auditoria e documentação**. Nenhuma alteração de lógica d
 - [Mapeamento de chaves organizacionais](arquitetura/mapeamento-chaves-organizacionais.md)
 - [Migration 008 — Movimentação e inventário transacionais](arquitetura/migration-008-movimentacao-inventario-transacional.md)
 - [Serviço V3 de estoque](arquitetura/servico-estoque-v3.md)
+- [Teste das operações transacionais de estoque](arquitetura/teste-estoque-transacional.md)
 
 ### Roadmap
 
