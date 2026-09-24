@@ -2,14 +2,18 @@
 
 ## Fundação
 
-- [ ] Modelar empresa
-- [ ] Modelar unidade
-- [ ] Modelar vínculo usuário/unidade
-- [ ] Definir papéis e permissões
+- [x] Modelar empresa
+- [x] Modelar unidade
+- [x] Modelar vínculo usuário/unidade
+- [x] Definir papéis e permissões
 - [ ] Definir autenticação
 - [ ] Definir sessão e contexto de unidade
 - [ ] Definir RLS
-- [ ] Criar padrão de serviços
+- [x] Criar padrão de serviços
+- [x] Definir fronteiras dos domínios
+- [x] Consolidar regras de negócio críticas
+- [x] Consolidar modelo relacional inicial
+- [x] Definir contratos dos serviços principais
 - [ ] Criar padrão de auditoria
 - [ ] Consolidar Service Worker
 
