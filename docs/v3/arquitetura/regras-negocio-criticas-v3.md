@@ -92,3 +92,26 @@ Estas regras devem ser consideradas invariantes do sistema e, quando possível, 
 Quanto mais crítica a regra, mais próxima do núcleo transacional ela deve ficar.
 
 UI pode validar para melhorar a experiência, mas serviço/backend/banco deve validar novamente.
+
+
+## ADDENDUM REVISAO 04 — Invariantes de Eventos e Ingressos
+
+56. Uma mesa de evento deve possuir identificação única dentro do próprio evento.
+57. Uma mesa não pode permanecer em duas reservas ativas incompatíveis ao mesmo tempo.
+58. A ocupação das mesas deve ser derivada de registros relacionais, não de arrays mantidos pela UI.
+59. Reserva cancelada ou expirada não deve ser apagada apenas para liberar a mesa; o histórico permanece.
+60. O valor praticado de uma reserva ou venda de mesa deve permanecer congelado após o registro da operação.
+61. Cortesia, bloqueio e classificações equivalentes devem usar dados estruturados, não texto livre do nome do cliente.
+62. A emissão de ingressos não pode ultrapassar o limite disponível mesmo sob concorrência.
+63. O contador de ingressos vendidos, quando existir, não pode ser a única fonte de verdade da quantidade emitida.
+64. Cada ingresso individual deve possuir código único e não previsível.
+65. Ingresso pendente não pode ser tratado como ingresso válido para entrada.
+66. A confirmação financeira que habilita a emissão deve possuir origem financeira rastreável quando houver cobrança.
+67. A validação válida deve consumir o ingresso apenas uma vez, inclusive com múltiplas portarias ou requisições concorrentes.
+68. Cada tentativa relevante de validação deve poder ser reconstruída pelo histórico de `validacoes_ingresso`.
+69. Ingresso utilizado não pode voltar silenciosamente ao estado válido por uma atualização concorrente.
+70. Cancelamento de ingresso não deve apagar o registro original.
+71. O fluxo público não pode receber permissões administrativas nem alterar estados administrativos de confirmação, emissão ou validação.
+72. Receita de eventos deve ser derivada de vendas/pagamentos e outras fontes financeiras normalizadas, e não de contador multiplicado pelo preço atual.
+73. Impressão e notificação não podem determinar sucesso ou fracasso da operação de evento ou ingresso.
+74. Retry da mesma `operacaoId` não pode gerar segunda reserva, emissão ou validação.
