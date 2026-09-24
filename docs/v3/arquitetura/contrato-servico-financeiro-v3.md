@@ -172,3 +172,38 @@ A auditoria essencial deve permanecer dentro da operação transacional.
 Este contrato não cria tabelas nem executa operações no banco V2 ou V3.
 
 O banco físico V3 será consolidado somente após a revisão de todos os domínios e das decisões de negócio pendentes.
+
+
+## ADDENDUM REVISAO 06 — Regras financeiras fechadas
+
+### Caixa
+
+A primeira entrega permite no máximo um caixa aberto por unidade.
+
+Fechamento exige:
+
+- contagem física;
+- valor esperado;
+- valor contado;
+- diferença;
+- justificativa quando houver diferença.
+
+Caixa encerrado não é reaberto. Correções posteriores usam operações de ajuste/estorno.
+
+### Venda e pagamento
+
+Pagamento imediato exige caixa aberto na unidade. Venda exclusivamente FIADO pode ser concluída sem entrada no caixa.
+
+PIX e cartão também ficam associados à sessão de caixa para reconciliação.
+
+### Conta a receber
+
+A conta guarda a unidade de origem. O recebimento identifica a unidade e o caixa em que ocorreu, permitindo recebimento em outra unidade da mesma empresa.
+
+### Estorno
+
+Estorno total ou parcial é operação compensatória e auditada. A operação original permanece preservada.
+
+Retorno físico ao estoque não acontece automaticamente pelo simples estorno; quando aplicável, deve ser registrado por operação específica de devolução/entrada.
+
+O contrato já não possui decisões financeiras funcionais abertas que impeçam a modelagem.
