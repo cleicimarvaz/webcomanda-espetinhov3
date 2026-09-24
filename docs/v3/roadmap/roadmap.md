@@ -84,6 +84,14 @@ Exemplos:
 - melhorias de experiência;
 - recursos inteligentes/assistidos.
 
+## Ordem de execução adotada
+
+O banco dedicado da V3 será criado e configurado somente na etapa final de preparação do ambiente.
+
+Enquanto isso, podemos evoluir arquitetura, contratos de serviços, validações, documentação, interfaces e integrações que não dependam da execução do banco.
+
+Os arquivos SQL permanecem versionados como especificação do banco futuro, mas não devem ser executados neste momento.
+
 ## Regra de progressão
 
 Uma fase pode avançar parcialmente, mas uma dependência estrutural não deve ser ignorada para acelerar uma funcionalidade que dependa dela.
