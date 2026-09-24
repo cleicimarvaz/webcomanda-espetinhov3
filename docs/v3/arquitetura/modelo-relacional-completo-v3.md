@@ -110,17 +110,9 @@ EVENTO N:N PATROCINADORES via EVENTO_PATROCINADORES
 - históricos críticos são preservados;
 - banco final será criado depois da revisão completa.
 
-## Decisões ainda abertas
+## Decisões funcionais fechadas
 
-- preço por unidade;
-- escopo de eventos;
-- despesas corporativas;
-- metas;
-- regras de transferência;
-- pagamento dividido;
-- regras de estoque de combos;
-- políticas de anexos;
-- configuração persistida versus local.
+As decisões anteriormente abertas foram consolidadas no ADR-004. A Revisão 06 registra os ajustes estruturais decorrentes e passa a ser a referência para a consolidação física do modelo.
 
 
 ## ADDENDUM REVISAO 04 — Eventos e Ingressos
