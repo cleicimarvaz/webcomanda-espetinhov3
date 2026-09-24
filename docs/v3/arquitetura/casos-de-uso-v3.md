@@ -166,3 +166,32 @@ O serviço orquestrador deve controlar essa sequência e a transação, quando a
 ## 14. Próxima etapa
 
 Usar esta matriz como base para os contratos dos serviços de aplicação e para a revisão final das entidades antes do banco V3.
+
+## ADDENDUM REVISAO 04 — Eventos e Ingressos
+
+A revisão do domínio amplia os casos de uso para separar cadastro, publicação, reserva, venda, emissão e validação.
+
+| Caso de uso | Resultado esperado |
+|---|---|
+| Criar evento | evento disponível para gestão dentro do contexto organizacional |
+| Publicar evento | evento disponível ao fluxo público conforme as regras definidas |
+| Configurar mesas | mesas do evento estruturadas e identificadas |
+| Reservar mesas | reserva criada sem conflito concorrente |
+| Confirmar/cancelar/expirar reserva | estado atualizado sem apagar o histórico |
+| Criar tipo/lote | oferta com preço, limite e janela de venda |
+| Criar solicitação pública | intenção agrupada antes da emissão, quando adotado |
+| Confirmar pagamento | operação financeira registrada e rastreável |
+| Emitir ingressos | um ou vários ingressos individuais vinculados à operação comercial |
+| Cancelar ingresso | ingresso invalidado sem apagar o registro |
+| Validar ingresso | consumo atômico e tentativa registrada |
+| Consultar histórico | histórico de reservas, emissões, validações e cancelamentos disponível |
+
+### Invariantes transversais
+
+O fluxo deve preservar três proteções centrais:
+
+1. uma mesa não pode ser reservada duas vezes em estados incompatíveis;
+2. o limite de ingressos não pode ser ultrapassado por concorrência;
+3. um ingresso não pode ser consumido duas vezes por portarias ou requisições concorrentes.
+
+Impressão e notificações permanecem efeitos posteriores e não definem o sucesso da operação principal.
