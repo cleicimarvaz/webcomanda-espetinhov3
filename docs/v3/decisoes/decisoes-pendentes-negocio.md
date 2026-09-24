@@ -6,7 +6,7 @@ Este documento separa o que já foi identificado no código e banco daquilo que 
 
 ### Situação atual
 
-`produtos.preco` possui um único preço por produto. O frontend ordena e vende diretamente usando esse campo.
+produtos.preco possui um único preço por produto. O frontend ordena e vende diretamente usando esse campo.
 
 ### Questão
 
@@ -16,15 +16,11 @@ Todas as unidades de uma mesma empresa terão o mesmo preço?
 
 **Modelo A — preço empresarial único**
 
-`produto → preço`
-
-Mais simples e mantém o comportamento atual.
+produto → preço
 
 **Modelo B — preço por unidade**
 
-`produto → preço por unidade`
-
-Permite cardápios e preços diferentes por estabelecimento.
+produto → preço por unidade
 
 **Modelo C — preço padrão + preço por unidade**
 
@@ -32,7 +28,7 @@ Um preço padrão empresarial pode ser sobrescrito por unidade.
 
 ### Impacto
 
-Essa decisão afeta `produtos`, histórico de preços, vendas, cardápio público, relatórios e combos.
+Essa decisão afeta produtos, histórico de preços, vendas, cardápio público, relatórios e combos.
 
 ---
 
@@ -46,15 +42,13 @@ O cadastro de cliente usa telefone como identificação prática e é compartilh
 
 Manter cliente no escopo da empresa e registrar em cada operação a unidade onde o relacionamento comercial aconteceu.
 
-Isso evita duplicação de cliente entre unidades.
-
 ---
 
 ## 3. Fornecedores
 
 ### Situação atual
 
-O código descreve o cadastro de fornecedores como compartilhado e o produto mantém `fornecedor_id`.
+O cadastro de fornecedores é tratado como compartilhado e produtos podem referenciá-los.
 
 ### Proposta para validação
 
@@ -64,34 +58,19 @@ Manter fornecedor no escopo da empresa, permitindo uso pelas unidades.
 
 ## 4. Despesas corporativas
 
-### Situação atual
-
-`despesas` não possui empresa/unidade no modelo atual.
-
 ### Questão
 
 Existirão despesas que pertencem à empresa como um todo, sem pertencer a uma unidade específica?
 
-### Modelo sugerido para suportar os dois casos
+### Modelo sugerido
 
-`empresa_id` obrigatório + `unidade_id` opcional.
+empresa_id obrigatório + unidade_id opcional.
 
-Assim:
-
-- `unidade_id` preenchido = despesa operacional;
-- `unidade_id` nulo = despesa corporativa.
-
-Essa é uma proposta técnica, não uma decisão funcional.
+Essa é uma proposta técnica, não uma decisão funcional definitiva.
 
 ---
 
 ## 5. Metas de faturamento
-
-### Situação atual
-
-`metas_faturamento` possui apenas ano, mês e valor da meta. Há uma restrição de unicidade para ano + mês.
-
-Isso pressupõe uma única meta por mês.
 
 ### Questão
 
@@ -101,175 +80,111 @@ Uma empresa com várias unidades terá:
 - uma meta por unidade;
 - ou ambas?
 
-### Modelo que suporta ambas
+Modelo flexível sugerido:
 
-`empresa_id` obrigatório + `unidade_id` opcional + `ano` + `mes`.
+empresa_id obrigatório + unidade_id opcional + ano + mes.
 
 ---
 
 ## 6. Eventos
 
-### Situação atual
-
-`eventos` não possui empresa ou unidade.
-
-O fluxo atual trata o evento como entidade independente, com reservas, mapa, patrocinadores e ingressos relacionados.
-
 ### Questão
 
 Um evento estará sempre associado a uma unidade física ou poderá ser apenas da empresa?
 
-### Modelo sugerido
+Modelo sugerido:
 
-`empresa_id` obrigatório + `unidade_id` opcional.
-
-Assim, um evento pode ser corporativo ou ligado a um estabelecimento específico.
+empresa_id obrigatório + unidade_id opcional.
 
 ---
 
 ## 7. Configurações
 
-### Situação atual
+A configuração precisa possuir escopo explícito.
 
-`configuracoes_sistema` mistura configurações da loja, layout de ticket, ordem de categorias e status da loja. O código usa inclusive uma linha fixa (`id = 1`).
+Possibilidades:
 
-### Problema para multiunidade
+- global;
+- empresa;
+- unidade;
+- usuário;
+- dispositivo.
 
-Uma única linha não permite que cada unidade tenha suas próprias configurações.
-
-### Proposta de separação
-
-- configuração global da aplicação;
-- configuração da empresa;
-- configuração da unidade;
-- preferência do usuário;
-- configuração do dispositivo.
-
-Não é necessário decidir agora se isso ficará em cinco tabelas; primeiro precisamos definir o escopo de cada propriedade.
+A definição deve ser feita propriedade por propriedade.
 
 ---
 
 ## 8. Estoque
 
-### Situação atual
+A direção arquitetural está fechada:
 
-`produtos` possui `estoque_atual`, enquanto `estoque_movimentacoes` registra movimentos.
+produto + unidade → saldo
 
-### Direção arquitetural
-
-O estoque deve pertencer à unidade, mesmo que o produto seja compartilhado pela empresa.
-
-Modelo conceitual:
-
-`produto` + `unidade` → saldo
-
-`produto` + `unidade` → movimentações.
-
-Isso permite que o mesmo produto tenha saldo independente em cada estabelecimento.
+O saldo oficial será por unidade e não ficará mais em produtos.estoque_atual como fonte de verdade.
 
 ---
 
 ## 9. Estratégia de estoque para combos
 
-A V2 expande um combo em seus componentes para efetuar a baixa. O modelo V3 precisa evitar ambiguidade entre estoque do próprio combo e estoque dos componentes.
-
-### Questão
-
-Qual será o comportamento padrão do negócio?
-
-Modelos conceituais:
+Definir qual estratégia será usada:
 
 - combo sem estoque próprio, baixando componentes;
 - combo como produto pronto, baixando o próprio combo;
-- estratégia definida por produto.
-
-A decisão interfere em venda, estoque, inventário e relatórios.
+- estratégia configurável por produto.
 
 ---
 
 ## 10. Saldo negativo
 
-A função transacional V3 atual permite saldo negativo por compatibilidade com o legado.
+Definir o comportamento definitivo:
 
-### Questão
-
-No comportamento definitivo, a unidade poderá:
-
-- manter saldo negativo;
+- saldo negativo permitido;
 - bloquear saída acima do saldo;
 - permitir exceção administrativa;
-- aplicar outra regra.
-
-A decisão deve ser aplicada no serviço/banco e não apenas na interface.
+- outra regra.
 
 ---
 
 ## 11. Quantidade fracionada
 
-O banco provisório usa `numeric(12,3)`, permitindo quantidades fracionadas.
+Definir se:
 
-### Questão
-
-Todos os produtos poderão usar quantidade decimal ou haverá produtos exclusivamente inteiros?
-
-Exemplos:
-
-- 1 lata;
-- 1 garrafa;
-- 0,500 kg;
-- 0,250 litro.
-
-Essa definição influencia validação, inventário, importação e relatórios.
+- todos os produtos podem usar decimal;
+- somente alguns produtos permitem fracionamento;
+- cada produto terá unidade de medida própria.
 
 ---
 
 ## 12. Combos dentro de combos
 
-O editor atual impede selecionar outro combo como componente.
+Definir se componentes podem ser outros combos.
 
-### Questão
-
-O negócio precisa de composição aninhada?
-
-Caso a resposta seja sim, o servidor precisará detectar ciclos e controlar profundidade.
-
-Caso contrário, pode permanecer a regra de componentes não compostos.
+Caso sejam permitidos, o serviço/banco deverá detectar ciclos e limitar a profundidade.
 
 ---
 
 ## 13. Transferência entre unidades
 
-O modelo V3 prevê transferência entre unidades como operação única:
-
-`unidade origem → unidade destino`
-
-gerando:
-
-`saída na origem + entrada no destino`.
-
-### Questões funcionais
-
-Antes da implementação, fechar:
+Fechar:
 
 - quem pode transferir;
-- se precisa de aprovação;
+- se exige aprovação;
 - se existe estado em trânsito;
-- quando o destino recebe o saldo;
-- como cancelar uma transferência.
+- quando o destino recebe saldo;
+- como cancelar.
 
 ---
 
 ## 14. Storage e imagens
 
-Definir quais arquivos serão:
+Definir:
 
-- públicos;
-- privados;
-- vinculados a entidades;
-- sujeitos a exclusão automática;
-- incluídos em backup.
-
-A V3 não deve tratar somente a URL pública como identidade do arquivo.
+- arquivos públicos;
+- arquivos privados;
+- metadados;
+- exclusão automática;
+- política de órfãos;
+- backup de arquivos.
 
 ---
 
@@ -277,13 +192,11 @@ A V3 não deve tratar somente a URL pública como identidade do arquivo.
 
 Definir:
 
-- se todo produto terá SKU;
-- se código de barras é opcional;
-- se pode haver mais de um código por produto;
-- se o código é único por empresa;
-- se a unidade poderá ter código próprio.
-
-A direção técnica atual é evitar conflito dentro do escopo empresarial.
+- SKU obrigatório ou opcional;
+- código de barras opcional ou obrigatório;
+- um ou vários códigos por produto;
+- unicidade empresarial;
+- possibilidade de código específico por unidade.
 
 ---
 
@@ -291,85 +204,64 @@ A direção técnica atual é evitar conflito dentro do escopo empresarial.
 
 Definir:
 
-- se haverá rascunho e conclusão;
-- se haverá apenas um inventário aberto por unidade;
-- se vários inventários poderão coexistir;
-- se a contagem poderá ser feita por etapas;
-- quais produtos entram na contagem;
-- se haverá aprovação para ajustes relevantes;
-- como impedir conclusão baseada em saldo obsoleto.
+- rascunho/conclusão;
+- um ou vários inventários abertos;
+- contagem por etapas;
+- conjunto de produtos;
+- aprovação para ajustes relevantes;
+- comportamento diante de saldo alterado após a contagem.
 
-A regra obrigatória permanece: o ajuste final deve ser baseado no saldo efetivo protegido no momento da operação.
+A regra obrigatória é que o ajuste final utilize o saldo efetivo protegido no momento da conclusão.
 
 ---
 
 ## 17. Identificação da mesa/comanda
 
-### Situação atual
-
-A V2 verifica localmente e depois consulta o banco, mas não possui uma garantia transacional própria contra duas aberturas concorrentes.
-
-### Questão
-
-A identificação da mesa/comanda deve ser:
+A V3 precisa definir se a identificação será:
 
 - única enquanto estiver aberta na unidade;
 - única também no histórico;
 - reutilizável depois do fechamento.
 
-A definição influencia a constraint/índice do banco.
-
 ---
 
 ## 18. Ciclo de vida da comanda
-
-### Questão
 
 Definir os estados oficiais.
 
 Modelo conceitual atual:
 
-`aberta → em_atendimento → pronta_para_fechamento → fechada`
+aberta → em_atendimento → pronta_para_fechamento → fechada
 
-Também podem existir:
+Estados complementares possíveis:
 
 - cancelada;
 - reaberta;
 - encerrada administrativamente.
 
-O estado comercial da comanda não deve ser confundido com o estado de pagamento.
-
 ---
 
 ## 19. Reabertura de comanda
 
-A V2 permite reabrir uma comanda já encerrada sem desfazer a venda anterior.
+Definir:
 
-### Questão
-
-Ao reabrir:
-
-- novos lançamentos permanecem na mesma comanda;
-- cria-se uma nova sessão de atendimento dentro da mesma comanda;
-- é necessária autorização especial;
-- existe limite de reaberturas?
-
-Essa decisão afeta histórico, relatórios e fechamento financeiro.
+- se reabre a mesma comanda;
+- se cria uma nova sessão de atendimento dentro da mesma comanda;
+- se exige autorização especial;
+- se existe limite de reaberturas.
 
 ---
 
 ## 20. Cancelamento e recusa de item
 
-### Questão
+Quando um item for recusado pela cozinha, definir:
 
-Quando um item é recusado pela cozinha:
+- cancelamento automático da cobrança;
+- confirmação pelo atendimento;
+- substituição;
+- cancelamento parcial.
 
-- ele deixa de ser cobrado automaticamente;
-- exige confirmação do atendimento;
-- pode ser substituído;
-- pode ser parcialmente recusado.
-
-Também definir quais ações são permitidas depois de o item já ter sido enviado à cozinha.
+Também definir quais alterações são permitidas depois do envio para cozinha.
 
 ---
 
@@ -379,13 +271,13 @@ Definir:
 
 - pagamento por valor;
 - pagamento por itens;
-- divisão de quantidade da mesma linha;
+- divisão de quantidade de uma linha;
 - múltiplas formas de pagamento;
 - troco por participante;
 - fechamento parcial;
 - fechamento total.
 
-A representação definitiva deve permitir rastrear a origem de cada valor recebido.
+A estrutura técnica já está preparada para representar pagamentos de forma explícita.
 
 ---
 
@@ -396,14 +288,12 @@ Definir quais papéis podem:
 - abrir comanda;
 - alterar item;
 - cancelar item;
-- dividir conta;
-- reabrir comanda;
-- fechar comanda;
-- estornar venda;
-- alterar desconto;
+- dividir;
+- reabrir;
+- fechar;
+- estornar;
+- aplicar desconto;
 - encerrar comandas em massa.
-
-A autorização definitiva será feita por permissão, não apenas por nome/nível armazenado no navegador.
 
 ---
 
@@ -411,85 +301,180 @@ A autorização definitiva será feita por permissão, não apenas por nome/nív
 
 ### Questão
 
-Uma venda balcão pode existir sem um caixa aberto?
+Uma venda balcão pode existir sem caixa aberto?
 
-Também precisa ser definida a política para:
+Também definir a política para:
 
 - venda em contingência;
 - pagamento sem caixa;
 - fiado;
-- abertura automática;
 - registro posterior.
 
 ---
 
-## 24. Cozinha
+## 24. Formas de pagamento
 
-Definir o ciclo operacional:
+Definir a lista oficial de formas de pagamento e quais delas exigem vínculo com caixa.
 
-`novo → aceito → em_preparo → pronto → entregue`
+Exemplos de representação:
 
-e as regras para:
-
-- recusa;
-- reenvio;
-- reimpressão;
-- desfazer;
-- prioridade;
-- cancelamento.
-
-A cozinha não deve decidir sozinha o efeito financeiro do item.
+- Dinheiro;
+- Pix;
+- Cartão;
+- Fiado;
+- outras formas necessárias.
 
 ---
 
-## 25. Reimpressão de pedido
+## 25. Pagamento dividido
 
-Definir quando um pedido pode ser reimpresso sem criar uma nova produção.
+Definir se múltiplas formas de pagamento serão permitidas na primeira entrega.
 
-A reimpressão deve ser rastreável, mas não deve gerar novo `pedido_item` nem nova baixa de estoque.
+A arquitetura V3 já prevê vários registros em venda_pagamentos.
 
 ---
 
-## 26. Atendimento simultâneo
+## 26. Conta a receber
 
-A V3 deve admitir múltiplos dispositivos operando na mesma unidade.
+Definir:
 
-Definir quais recursos podem ser usados simultaneamente na mesma comanda e como conflitos serão resolvidos.
+- se cliente cadastrado é obrigatório para fiado;
+- se recebimento acima do saldo pode virar crédito;
+- se uma conta pode ser recebida em unidades diferentes;
+- quais papéis podem lançar, editar e receber.
+
+---
+
+## 27. Despesas
+
+Definir:
+
+- se pagamento parcial é permitido;
+- se despesa pode ser alterada depois de paga;
+- quando uma despesa deve ser cancelada em vez de excluída;
+- quais despesas podem ser corporativas.
+
+---
+
+## 28. Estorno
+
+Definir:
+
+- estorno total;
+- estorno parcial;
+- autorização adicional;
+- devolução automática de estoque;
+- reversão automática de conta a receber;
+- comportamento do caixa;
+- prazo ou janela para estorno.
+
+---
+
+## 29. Fechamento de caixa
+
+Definir:
+
+- quantidade de caixas abertos simultaneamente por unidade;
+- se toda unidade terá um único caixa operacional;
+- se exige contagem física;
+- se diferença exige justificativa;
+- quem pode fechar;
+- se pode reabrir um caixa fechado;
+- se haverá conferência por segundo usuário.
+
+---
+
+## 30. Pagamentos não monetários e caixa
+
+Definir se Pix, cartão e outras formas devem sempre estar vinculados a uma sessão de caixa mesmo quando não representam numerário físico.
+
+A definição interfere diretamente nos relatórios, conciliação e permissões.
+
+---
+
+## 31. Encerramento de turno x fechamento do caixa
+
+A V3 deve manter os conceitos separados:
+
+- encerramento local do turno = remove o contexto daquele dispositivo;
+- fechamento do caixa = encerra a sessão operacional da unidade.
+
+O comportamento atual do navegador não deve ser tratado como fechamento real do caixa.
+
+---
+
+## 32. Conciliação do caixa
+
+Definir se o fechamento exibirá e registrará:
+
+- valor inicial;
+- entradas;
+- saídas;
+- valor esperado;
+- valor contado;
+- diferença;
+- justificativa.
+
+A direção técnica é manter a diferença como dado histórico.
+
+---
+
+## 33. Estorno de venda fiada
+
+Definir o comportamento quando já houver recebimentos da conta a receber:
+
+- cancelar saldo restante;
+- gerar crédito;
+- reverter recebimentos;
+- tratar conforme regra administrativa.
+
+---
+
+## 34. Atendimento simultâneo
+
+Definir como a operação deseja tratar dois usuários na mesma comanda ao mesmo tempo e quais ações podem ocorrer em paralelo.
+
+A arquitetura técnica exige que conflitos críticos sejam resolvidos no serviço/banco.
 
 ---
 
 ## Matriz de decisão
 
-| Tema | Comportamento atual | Proposta técnica | Decisão funcional necessária? |
-|---|---|---|---|
-| Preço | um preço em `produtos` | preço empresarial ou por unidade | Sim |
-| Cliente | compartilhado | empresa | Não necessariamente |
-| Fornecedor | compartilhado | empresa | Não necessariamente |
-| Despesa | sem escopo | empresa + unidade opcional | Sim |
-| Meta | uma por ano/mês | empresa + unidade opcional | Sim |
-| Evento | sem escopo | empresa + unidade opcional | Sim |
-| Configuração | linha global | separar por escopo | Sim |
-| Estoque | no produto | por unidade | Não para a direção técnica |
-| Combo | baixa via expansão no frontend | regra explícita no serviço/banco | Sim |
-| Saldo negativo | permitido na transição | regra aplicada no serviço/banco | Sim |
-| Quantidade decimal | banco suporta | definir regra por produto | Sim |
-| Combo dentro de combo | bloqueado no editor | manter bloqueado ou permitir com proteção | Sim |
-| Transferência | inexistente | operação transacional entre unidades | Sim |
-| Storage | URLs no produto | política de arquivos/Storage | Sim |
-| SKU/código de barras | campo simples | escopo empresarial e regras | Sim |
-| Inventário | importação/ajuste | ciclo e concorrência estruturados | Sim |
-| Identificação de mesa | controle local + consulta | unicidade no banco conforme regra | Sim |
-| Reabertura | retorna status para aberta | sessão/histórico explícitos | Sim |
-| Cancelamento/recusa | altera JSONB e total | evento de domínio + regra financeira | Sim |
-| Divisão | histórico_vendas + alteração da comanda | partes + pagamentos explícitos | Sim |
-| Permissões | níveis no navegador | permissões por caso de uso | Sim |
-| Caixa | controle separado | integração transacional com venda | Sim |
-| Cozinha | status dentro do item | pedido + pedido_item | Sim |
-| Reimpressão | função de impressão | saída rastreável sem duplicar produção | Sim |
-| Concorrência | atualizações do JSONB inteiro | operações específicas/transacionais | Não para a direção técnica |
+| Tema | Direção técnica | Decisão funcional necessária? |
+|---|---|---|
+| Preço | empresa, unidade ou padrão + sobrescrita | Sim |
+| Cliente | empresa | Não necessariamente |
+| Fornecedor | empresa | Não necessariamente |
+| Despesa | empresa + unidade opcional | Sim |
+| Meta | empresa + unidade opcional | Sim |
+| Evento | empresa + unidade opcional | Sim |
+| Configuração | escopo explícito | Sim |
+| Estoque | produto + unidade | Não |
+| Combo | estratégia explícita | Sim |
+| Saldo negativo | regra no serviço/banco | Sim |
+| Quantidade decimal | regra por produto | Sim |
+| Combo dentro de combo | bloqueio ou proteção contra ciclo | Sim |
+| Transferência | operação transacional | Sim |
+| Storage | política de arquivos | Sim |
+| SKU | escopo e unicidade | Sim |
+| Inventário | ciclo e concorrência | Sim |
+| Mesa/comanda | unicidade de identificação | Sim |
+| Reabertura | histórico explícito | Sim |
+| Cancelamento | evento de domínio + regra financeira | Sim |
+| Divisão | partes + pagamentos | Sim |
+| Permissões | código de permissão | Sim |
+| Caixa | sessão por unidade | Sim |
+| Formas de pagamento | catálogo oficial | Sim |
+| Pagamento dividido | venda_pagamentos | Sim |
+| Contas a receber | ledger + recebimentos | Sim |
+| Despesas | obrigação + pagamentos | Sim |
+| Estorno | operação compensatória | Sim |
+| Fechamento de caixa | sessão real + conciliação | Sim |
+| Turno local | apenas contexto de dispositivo | Não |
+| Concorrência | serviço/banco | Não para a direção técnica |
 
 ## Regra antes da migration
 
-Nenhuma das decisões marcadas como dependente do negócio deve ser codificada como regra permanente antes de ser validada.
+Nenhuma decisão funcional deve ser codificada como regra permanente antes de ser validada.
 
-O banco V3 continua programado para ser criado somente depois que a revisão dos módulos e dessas decisões estiver consolidada.
+O banco V3 será criado somente depois que as revisões de todos os domínios estiverem concluídas e as decisões necessárias estiverem consolidadas.
