@@ -121,3 +121,29 @@ EVENTO N:N PATROCINADORES via EVENTO_PATROCINADORES
 - regras de estoque de combos;
 - políticas de anexos;
 - configuração persistida versus local.
+
+
+## ADDENDUM REVISAO 04 — Eventos e Ingressos
+
+### Estrutura relacional revisada
+
+```text
+EVENTO 1:N EVENTO_MESAS
+RESERVA_EVENTO N:N EVENTO_MESAS via RESERVA_MESAS
+EVENTO 1:N TIPOS_INGRESSO
+SOLICITACAO_INGRESSO 1:N SOLICITACAO_INGRESSO_ITENS
+SOLICITACAO_INGRESSO N:1 EVENTO
+SOLICITACAO_INGRESSO → VENDA quando houver cobrança
+EVENTO 1:N INGRESSOS
+INGRESSO → VENDA quando emitido por uma venda
+INGRESSO 1:N VALIDACOES_INGRESSO
+EVENTO N:N PATROCINADORES via EVENTO_PATROCINADORES
+```
+
+### Observações
+
+`eventos.quantidade_mesas` deixa de ser a fonte oficial de capacidade quando `evento_mesas` estiver consolidado.
+`reservas_evento.mesas` em JSONB deixa de ser a fonte oficial de ocupação; a relação passa para `reserva_mesas`.
+`tipos_ingresso.quantidade_vendida`, caso exista, deve ser tratado como dado derivado/cache transacional e não como fonte primária.
+Uma venda pode originar vários ingressos individuais, cada um com código próprio e histórico de validação.
+Quando houver solicitação pública antes da confirmação financeira, a intenção deve ser representada separadamente da emissão.
