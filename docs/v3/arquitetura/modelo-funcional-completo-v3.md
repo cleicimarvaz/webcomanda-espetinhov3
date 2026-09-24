@@ -772,3 +772,31 @@ Quando estas definições estiverem consolidadas, o banco V3 deverá ser criado 
 - testes de integridade e concorrência.
 
 Não usar o banco V3 como ambiente de prototipagem de cada pequeno ajuste. A modelagem deve amadurecer primeiro no nível de domínio e contratos.
+
+## ADDENDUM REVISAO 04 — Eventos e Ingressos
+
+A revisão do domínio refinou a modelagem de eventos e ingressos.
+
+### Estrutura atualizada do domínio
+
+Evento deve possuir `empresa_id` obrigatório e `unidade_id` opcional. Mesas deixam de ser apenas uma capacidade numérica e passam a ser representadas por `evento_mesas`. Reservas relacionam as mesas por `reserva_mesas`.
+
+Para ingressos, a V3 deve considerar as entidades `tipos_ingresso`, `ingressos` e `validacoes_ingresso`. Quando o fluxo público exigir uma etapa anterior à emissão, o modelo deve prever `solicitacoes_ingresso` e `solicitacao_ingresso_itens`.
+
+Uma venda pode gerar vários ingressos individuais. Cada ingresso mantém código único, valor praticado, venda de origem e histórico de validações.
+
+### Fonte de verdade revisada
+
+- capacidade/mesas: `evento_mesas`;
+- ocupação: `reserva_mesas` + estado da reserva;
+- valor histórico: reserva/venda registrada, nunca o preço atual do evento;
+- quantidade emitida: ingressos efetivamente emitidos, com contador apenas como cache quando necessário;
+- consumo de ingresso: `ingressos` + `validacoes_ingresso`;
+- receita: `vendas` + `venda_pagamentos` e demais fontes financeiras normalizadas.
+
+### Entidades adicionais propostas
+
+- `solicitacoes_ingresso`;
+- `solicitacao_ingresso_itens`.
+
+Essas entidades representam a intenção pública antes da emissão quando houver confirmação financeira posterior.
