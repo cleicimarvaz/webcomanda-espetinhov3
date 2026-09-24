@@ -1,5 +1,8 @@
 # Schema base do banco V3
 
+> **ATENÇÃO — DOCUMENTO PROVISÓRIO:** este schema representa apenas a fundação inicial e **não corresponde ao modelo físico final após o ADR-004 e a Revisão 06**. Novas entidades e restrições ainda precisam ser incorporadas. Não executar este arquivo como banco definitivo. O SQL final será consolidado somente depois da revisão relacional completa.
+
+
 ## Objetivo
 
 O arquivo `arq/schema-v3-base.sql` é o ponto de partida para um **banco novo da V3**.
