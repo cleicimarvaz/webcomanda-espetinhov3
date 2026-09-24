@@ -42,6 +42,8 @@ A regra continua sendo evoluir por etapas: alterações críticas devem ser docu
 - [Módulos e dependências](arquitetura/modulos.md)
 - [Arquitetura de dados alvo](arquitetura/banco-de-dados.md)
 - [Schema base do banco V3](arquitetura/schema-v3-base.md)
+- [Funções transacionais do banco V3](arquitetura/schema-v3-base.md#funções-transacionais)
+- [Pre-flight do banco V3](testes/preflight-banco-v3.md)
 - [Modelo organizacional](arquitetura/modelo-organizacional.md)
 - [Papéis e permissões](arquitetura/permissoes.md)
 - [Modelo relacional organizacional](arquitetura/modelo-relacional-organizacional.md)
