@@ -39,7 +39,7 @@ Definir policies para:
 - ações administrativas;
 - dados públicos.
 
-Depois, habilitar e validar RLS gradualmente em ambiente de teste.
+Depois, quando o banco V3 for criado, habilitar e validar RLS gradualmente em ambiente de teste.
 
 ## 4. Camada de serviços
 
@@ -61,7 +61,11 @@ Definir um formato estruturado de evento de auditoria e uma função única para
 
 Consolidar a existência de um único Service Worker oficial e uma única estratégia de versionamento do cache.
 
-## 7. Critérios de saída
+## 7. Banco V3
+
+A criação física do banco não faz parte da etapa atual. Ela será realizada no final da preparação, depois que os contratos dos serviços e as decisões estruturais necessárias estiverem consolidados.
+
+## 8. Critérios de saída
 
 A fase estará pronta para avançar quando:
 
