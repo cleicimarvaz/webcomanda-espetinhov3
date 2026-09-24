@@ -115,3 +115,20 @@ UI pode validar para melhorar a experiência, mas serviço/backend/banco deve va
 72. Receita de eventos deve ser derivada de vendas/pagamentos e outras fontes financeiras normalizadas, e não de contador multiplicado pelo preço atual.
 73. Impressão e notificação não podem determinar sucesso ou fracasso da operação de evento ou ingresso.
 74. Retry da mesma `operacaoId` não pode gerar segunda reserva, emissão ou validação.
+
+## ADDENDUM REVISAO 06 — Invariantes decorrentes das decisões fechadas
+
+75. SKU é único dentro da empresa quando informado.
+76. Cada código de barras informado deve ser único dentro da empresa e pertence a um único produto.
+77. Pagamento imediato exige sessão de caixa aberta na unidade; FIADO puro não gera entrada de caixa.
+78. Uma unidade não pode possuir mais de um caixa aberto simultaneamente.
+79. Uma unidade não pode possuir mais de um inventário ativo simultaneamente.
+80. Uma transferência de estoque só aumenta o saldo do destino no recebimento.
+81. Uma conta a receber conserva sua unidade de origem; o recebimento registra onde efetivamente ocorreu.
+82. Um lote de ingresso não pode emitir fora da janela sem regra administrativa explícita.
+83. Transferência de ingresso não apaga a titularidade anterior e só pode ocorrer antes do início da operação do evento.
+84. Reentrada só é válida quando habilitada no evento e fica registrada como nova validação.
+85. Na primeira entrega, validação de ingresso exige conexão com o serviço/banco oficial.
+86. Reimpressão não cria nova venda, pagamento, ingresso ou movimento financeiro.
+87. Falha de impressão não desfaz a operação de origem.
+88. Arquivos de negócio não são excluídos automaticamente somente por perderem referência.
