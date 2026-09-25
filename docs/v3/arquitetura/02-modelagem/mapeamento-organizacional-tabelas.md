@@ -1,8 +1,8 @@
-# Mapeamento organizacional das tabelas
+# Mapeamento organizacional das tabelas — referência histórica
 
-Este mapa classifica as 21 tabelas atuais de acordo com o contexto organizacional esperado para a V3. A classificação é uma diretriz de arquitetura, não uma alteração de banco.
+> Este documento foi produzido durante a fase inicial de modelagem. As decisões que apareciam como abertas já foram fechadas no ADR-004. Para o estado atual, consulte o [modelo relacional canônico](modelo-relacional-completo-v3.md).
 
-## Legenda
+ Legenda
 
 - **Global** — pertence à aplicação e não depende de empresa/unidade.
 - **Empresa** — compartilhado entre as unidades de uma empresa.
