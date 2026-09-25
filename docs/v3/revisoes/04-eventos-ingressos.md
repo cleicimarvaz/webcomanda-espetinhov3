@@ -1,3 +1,5 @@
+> **Nota de histórico:** as decisões funcionais de eventos e ingressos que aparecem como pendentes neste documento foram posteriormente fechadas no ADR-004. O conteúdo abaixo preserva a revisão realizada na época.
+
 # Revisão V3 — Eventos + Ingressos
 
 ## Objetivo
