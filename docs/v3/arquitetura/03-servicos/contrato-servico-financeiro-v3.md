@@ -113,7 +113,7 @@ Deve permitir, conforme o caso:
 - efeitos de contas a receber;
 - auditoria.
 
-O estorno total ou parcial será definido pelo negócio.
+O estorno total ou parcial é suportado conforme o ADR-004: ambos são operações compensatórias, autorizadas e auditadas.
 
 ## Atomicidade
 
@@ -171,7 +171,7 @@ A auditoria essencial deve permanecer dentro da operação transacional.
 
 Este contrato não cria tabelas nem executa operações no banco V2 ou V3.
 
-O banco físico V3 será consolidado somente após a revisão de todos os domínios e das decisões de negócio pendentes.
+O banco físico V3 será consolidado após a revisão final de consistência entre modelos, contratos e regras.
 
 
 ## ADDENDUM REVISAO 06 — Regras financeiras fechadas
