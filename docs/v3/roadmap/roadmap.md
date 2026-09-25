@@ -4,7 +4,7 @@ Este roadmap organiza a evolução da V2 para a V3 sem exigir uma reescrita comp
 
 ## Fase 0 — Auditoria e definição
 
-Status: concluída em grande parte.
+Status: concluída.
 
 - inventário da aplicação;
 - auditoria do banco;
@@ -15,7 +15,9 @@ Status: concluída em grande parte.
 - PWA/offline;
 - impressão;
 - backup;
-- arquitetura alvo.
+- arquitetura alvo;
+- decisões de negócio consolidadas;
+- modelo relacional canônico revisado.
 
 ## Fase 1 — Fundação técnica e segurança
 
