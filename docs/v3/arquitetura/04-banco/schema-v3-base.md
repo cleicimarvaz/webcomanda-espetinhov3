@@ -1,6 +1,6 @@
 # Schema base do banco V3
 
-> **ATENÇÃO — DOCUMENTO PROVISÓRIO:** este schema representa apenas a fundação inicial e **não corresponde ao modelo físico final após o ADR-004 e a Revisão 06**. Novas entidades e restrições ainda precisam ser incorporadas. Não executar este arquivo como banco definitivo. O SQL final será consolidado somente depois da revisão relacional completa.
+> **ATENÇÃO — DOCUMENTO PROVISÓRIO:** este schema representa apenas a fundação inicial e **não corresponde ao modelo físico final após o ADR-004 e a Revisão 07**. Novas entidades e restrições ainda precisam ser incorporadas. Não executar este arquivo como banco definitivo. O SQL final será consolidado somente depois da revisão relacional completa.
 
 
 ## Objetivo
@@ -64,7 +64,8 @@ O banco também possui uma estrutura própria para configurações funcionais:
 - global;
 - empresa;
 - unidade;
-- usuário.
+- usuário;
+- dispositivo.
 
 Isso evita usar uma configuração única para todos os contextos.
 
