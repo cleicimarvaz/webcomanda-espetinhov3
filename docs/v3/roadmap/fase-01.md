@@ -10,9 +10,7 @@ Definir entidades e relações:
 
 `empresa` → `unidade` → `usuário/perfil` → `dados operacionais`.
 
-Foi criado o [mapa organizacional das tabelas](../arquitetura/mapeamento-organizacional-tabelas.md), com a classificação inicial das 21 tabelas e os pontos que ainda dependem de decisão.
-
-Precisamos decidir quais dados são globais à empresa e quais pertencem a uma unidade.
+Foi criado o [mapa organizacional das tabelas](../arquitetura/02-modelagem/mapeamento-organizacional-tabelas.md). As decisões de escopo foram consolidadas no ADR-004.
 
 ## 2. Identidade
 
@@ -39,7 +37,7 @@ Definir policies para:
 - ações administrativas;
 - dados públicos.
 
-Depois, quando o banco V3 for criado, habilitar e validar RLS gradualmente em ambiente de teste.
+Depois, quando o banco V3 for criado, habilitar e validar RLS em ambiente de teste antes da operação real.
 
 ## 4. Camada de serviços
 
@@ -63,7 +61,7 @@ Consolidar a existência de um único Service Worker oficial e uma única estrat
 
 ## 7. Banco V3
 
-A criação física do banco não faz parte da etapa atual. Ela será realizada no final da preparação, depois que os contratos dos serviços e as decisões estruturais necessárias estiverem consolidados.
+A criação física do banco não faz parte da etapa atual. Ela será realizada depois da revisão final de consistência e da consolidação do SQL físico definitivo.
 
 ## 8. Critérios de saída
 
