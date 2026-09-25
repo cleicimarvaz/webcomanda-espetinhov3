@@ -5,7 +5,7 @@ Esta pasta registra decisões que afetem arquitetura, dados, segurança, infraes
 ## Estrutura
 
 - [ADRs](adrs/) — decisões formais que orientam a V3.
-- [Histórico](historico/) — documentos de decisões que ficaram pendentes durante o levantamento.
+- [Histórico](historico/) — documentos de decisões que ficaram pendentes durante o levantamento e foram posteriormente encerradas.
 
 ## ADRs atuais
 
