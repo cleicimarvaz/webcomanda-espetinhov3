@@ -1,61 +1,70 @@
 # Arquitetura e modelagem — V3
 
-A pasta reúne os documentos técnicos da V3. Para evitar a sensação de muitos arquivos soltos, a leitura deve seguir estes grupos.
+A documentação técnica está separada por assunto para manter os documentos de referência fáceis de localizar.
 
-## 1. Visão e arquitetura
+## 01 — Visão e arquitetura
 
-- `arquitetura-v3.md`
-- `modulos.md`
-- `fronteiras-dominios-v3.md`
-- `casos-de-uso-v3.md`
+- [Arquitetura V3](01-visao/arquitetura-v3.md)
+- [Módulos](01-visao/modulos.md)
+- [Fronteiras dos domínios](01-visao/fronteiras-dominios-v3.md)
+- [Casos de uso](01-visao/casos-de-uso-v3.md)
 
-## 2. Modelagem do domínio e relacionamentos
+## 02 — Modelagem
 
-**Documentos canônicos:**
+### Documentos canônicos
 
-- `modelo-funcional-completo-v3.md`
-- `modelo-relacional-completo-v3.md` — referência relacional atual
+- [Modelo funcional completo](02-modelagem/modelo-funcional-completo-v3.md)
+- [Modelo relacional completo](02-modelagem/modelo-relacional-completo-v3.md)
 
-**Histórico de revisão:**
+### Documentos de apoio
 
-- `../revisoes/06-modelo-relacional-final.md`
+- [Modelo organizacional](02-modelagem/modelo-organizacional.md)
+- [Modelo relacional organizacional](02-modelagem/modelo-relacional-organizacional.md)
+- [Regras de negócio críticas](02-modelagem/regras-negocio-criticas-v3.md)
+- [Permissões](02-modelagem/permissoes.md)
+- [Mapeamento organizacional](02-modelagem/mapeamento-organizacional-tabelas.md)
+- [Mapeamento de chaves](02-modelagem/mapeamento-chaves-organizacionais.md)
+- [Mapeamento V2 → V3](02-modelagem/mapeamento-v2-v3.md)
 
-Os documentos de revisão registram como chegamos ao estado atual; não substituem os modelos canônicos.
-- `modelo-organizacional.md`
-- `modelo-relacional-organizacional.md`
-- `mapeamento-organizacional-tabelas.md`
-- `mapeamento-chaves-organizacionais.md`
-- `mapeamento-v2-v3.md`
-- `permissoes.md`
+## 03 — Serviços
 
-## 3. Contratos e serviços
+- [Contrato — Identidade](03-servicos/contrato-servico-identidade-v3.md)
+- [Contrato — Atendimento](03-servicos/contrato-servico-atendimento-v3.md)
+- [Contrato — Venda](03-servicos/contrato-servico-venda-v3.md)
+- [Contrato — Financeiro](03-servicos/contrato-servico-financeiro-v3.md)
+- [Contrato — Eventos](03-servicos/contrato-servico-eventos-v3.md)
+- [Contrato — Relatórios](03-servicos/contrato-servico-relatorios-v3.md)
+- [Contrato — Impressão](03-servicos/contrato-servico-impressao-v3.md)
+- [Serviço — Contexto organizacional](03-servicos/servico-contexto-organizacional-v3.md)
+- [Serviço — Estoque](03-servicos/servico-estoque-v3.md)
+- [Integração — Movimentação manual](03-servicos/integracao-movimentacao-manual-v3.md)
 
-- `contrato-servico-identidade-v3.md`
-- `contrato-servico-atendimento-v3.md`
-- `contrato-servico-venda-v3.md`
-- `contrato-servico-financeiro-v3.md`
-- `contrato-servico-eventos-v3.md`
-- `contrato-servico-relatorios-v3.md`
-- `contrato-servico-impressao-v3.md`
-- `servico-contexto-organizacional-v3.md`
-- `servico-estoque-v3.md`
-- `integracao-movimentacao-manual-v3.md`
+## 04 — Banco e persistência
 
-## 4. Banco e persistência
+- [Banco de dados](04-banco/banco-de-dados.md)
+- [Configuração do banco V3](04-banco/configuracao-banco-v3.md)
+- [Schema V3 — provisório](04-banco/schema-v3-base.md)
+- [Teste transacional de estoque](04-banco/teste-estoque-transacional.md)
 
-- `banco-de-dados.md`
-- `configuracao-banco-v3.md`
-- `schema-v3-base.md`
-- `regras-negocio-criticas-v3.md`
-- `teste-estoque-transacional.md`
+## 05 — Histórico de migrations
 
-As migrations `001` a `008` são mantidas neste grupo como **histórico da evolução sobre a V2**. Elas não devem ser aplicadas diretamente no banco dedicado V3.
+As migrations 001–008 ficam isoladas aqui porque descrevem o caminho histórico de evolução sobre a V2. Não são o SQL definitivo do banco V3.
 
-## 5. Segurança
+- [Migration 001](05-historico-migrations/migration-001-fundacao-organizacional.md)
+- [Migration 002](05-historico-migrations/migration-002-backfill-organizacional.md)
+- [Migration 003](05-historico-migrations/migration-003-fornecedores-empresa.md)
+- [Migration 004](05-historico-migrations/migration-004-clientes-empresa.md)
+- [Migration 005](05-historico-migrations/migration-005-estoque-por-unidade.md)
+- [Migration 006](05-historico-migrations/migration-006-contexto-inventario-estoque.md)
+- [Migration 007](05-historico-migrations/migration-007-baixa-estoque-transacional.md)
+- [Migration 008](05-historico-migrations/migration-008-movimentacao-inventario-transacional.md)
 
-- `estrategia-rls.md`
-- `permissoes.md`
+## 06 — Segurança
+
+- [Estratégia de RLS](06-seguranca/estrategia-rls.md)
+
+A autorização final deverá ser implementada e testada quando o banco V3 for criado.
 
 ## Convenção
 
-Documentos que consolidam o estado atual devem ser tratados como referência. Addendums e migrations antigas servem para preservar histórico e rastreabilidade.
+O modelo funcional e o modelo relacional são as referências atuais. As revisões e migrations registram histórico de construção e não devem substituir os documentos canônicos.
