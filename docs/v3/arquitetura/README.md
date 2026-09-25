@@ -11,8 +11,16 @@ A pasta reúne os documentos técnicos da V3. Para evitar a sensação de muitos
 
 ## 2. Modelagem do domínio e relacionamentos
 
+**Documentos canônicos:**
+
 - `modelo-funcional-completo-v3.md`
-- `modelo-relacional-completo-v3.md`
+- `modelo-relacional-completo-v3.md` — referência relacional atual
+
+**Histórico de revisão:**
+
+- `../revisoes/06-modelo-relacional-final.md`
+
+Os documentos de revisão registram como chegamos ao estado atual; não substituem os modelos canônicos.
 - `modelo-organizacional.md`
 - `modelo-relacional-organizacional.md`
 - `mapeamento-organizacional-tabelas.md`
