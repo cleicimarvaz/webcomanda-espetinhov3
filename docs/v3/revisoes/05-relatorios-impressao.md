@@ -1,3 +1,5 @@
+> **Nota de histórico:** esta revisão registra o fechamento técnico do domínio na data em que foi realizada. O estado atual das decisões funcionais está no ADR-004.
+
 # Revisão V3 — Relatórios + Impressão
 
 ## Objetivo
