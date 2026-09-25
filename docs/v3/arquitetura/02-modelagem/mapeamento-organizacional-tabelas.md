@@ -120,16 +120,8 @@ O fato de o usuário público poder consultar um evento não significa que ele d
 
 A V3 deve preferir uma consulta pública limitada ou um serviço/RPC específico para o fluxo público.
 
-## Pontos que ainda precisam de decisão
+## Status atual
 
-1. Produto e preço são globais da empresa ou podem variar por unidade?
-2. Clientes e fornecedores serão sempre compartilhados?
-3. Despesas corporativas existirão separadas das despesas de unidade?
-4. Metas serão por empresa, unidade ou ambas?
-5. Eventos pertencem à empresa, à unidade ou podem ter ambos os escopos?
-6. Configurações serão armazenadas em tabelas diferentes ou em uma estrutura com `scope_type`/`scope_id`?
-7. Como uma empresa existente será migrada para a primeira unidade?
+As decisões funcionais de escopo foram consolidadas no ADR-004. Este documento permanece como mapa histórico das tabelas da V2 e apoio para rastreabilidade.
 
-## Próximo passo
-
-Antes de criar policies RLS definitivas, transformar este mapa em um modelo relacional com as novas entidades organizacionais e definir os escopos dos sete casos em aberto.
+Consulte o [modelo relacional canônico](modelo-relacional-completo-v3.md) para o estado atual da V3.
