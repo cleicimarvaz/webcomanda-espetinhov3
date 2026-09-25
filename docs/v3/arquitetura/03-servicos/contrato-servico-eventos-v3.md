@@ -145,7 +145,7 @@ Operações:
 - consultar;
 - encerrar vendas.
 
-O contrato deve suportar, conforme a decisão funcional, tanto tipo simples quanto modelo com lotes.
+A decisão fechada é utilizar tipo de ingresso + lote. Cada lote concentra preço, limite, janela de venda e status.
 
 Cada opção vendável deve possuir:
 
