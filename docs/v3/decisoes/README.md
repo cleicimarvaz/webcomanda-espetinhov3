@@ -2,21 +2,20 @@
 
 Esta pasta registra decisões que afetem arquitetura, dados, segurança, infraestrutura ou comportamento funcional.
 
-Antes de uma mudança estrutural relevante, registrar:
+## Estrutura
 
-1. contexto;
-2. problema;
-3. alternativas consideradas;
-4. decisão adotada;
-5. impactos;
-6. plano de migração;
-7. como validar.
+- [ADRs](adrs/) — decisões formais que orientam a V3.
+- [Histórico](historico/) — documentos de decisões que ficaram pendentes durante o levantamento.
+
+## ADRs atuais
+
+- [ADR-004 — Fechamento das decisões de negócio da V3](adrs/ADR-004-fechamento-decisoes-negocio-v3.md)
+- [ADR-003 — Banco de dados dedicado para a V3](adrs/ADR-003-banco-dados-v3-separado.md)
+- [ADR-002 — Modelo relacional organizacional](adrs/ADR-002-modelo-relacional-organizacional.md)
+- [ADR-001 — Modelo organizacional](adrs/ADR-001-modelo-organizacional.md)
 
 ## Regra
 
 A documentação não substitui testes. Uma decisão registrada deve ser acompanhada de evidência quando a implementação começar.
 
-## ADRs recentes
-
-- [ADR-004 — Fechamento das decisões de negócio da V3](ADR-004-fechamento-decisoes-negocio-v3.md)
-- [ADR-003 — Banco de dados dedicado para a V3](ADR-003-banco-dados-v3-separado.md)
+O ADR-004 é a referência atual para as decisões funcionais fechadas em 2026-09-24.
