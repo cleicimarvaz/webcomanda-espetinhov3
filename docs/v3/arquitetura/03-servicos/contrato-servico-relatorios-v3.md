@@ -174,11 +174,8 @@ Consultas comuns não precisam gerar evento para cada leitura.
 
 Operações administrativas sobre configuração de relatórios, escopos ou exportações sensíveis podem possuir auditoria conforme a política geral.
 
-## Decisões funcionais pendentes
+## Status das decisões
 
-- conjunto de relatórios do primeiro release;
-- indicadores oficiais do dashboard;
-- definição final do DRE gerencial;
-- regras de indicadores com estorno;
-- relatórios corporativos;
-- retenção e processamento assíncrono de relatórios grandes.
+O conjunto de relatórios do primeiro release, os indicadores principais, o DRE gerencial, o tratamento de estornos e o escopo empresa/unidade foram consolidados no ADR-004 e na Revisão 05.
+
+O processamento assíncrono de relatórios grandes permanece como decisão técnica de implementação e não bloqueia o modelo de dados.
