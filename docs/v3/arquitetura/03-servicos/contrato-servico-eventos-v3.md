@@ -436,23 +436,11 @@ A UI não deve interpretar mensagens livres como regra de negócio.
 
 ---
 
-## 25. Decisões funcionais pendentes
+## 25. Status das decisões
 
-O contrato continua aguardando:
+As decisões funcionais desse contrato foram consolidadas no ADR-004 e complementadas pela Revisão 07 do modelo relacional.
 
-- ciclo oficial do evento;
-- prazo da reserva pendente;
-- tipo/lote;
-- janela de venda;
-- política de cancelamento;
-- reentrada;
-- transferência;
-- integração de pagamento público;
-- obrigatoriedade de caixa;
-- permissões específicas;
-- múltiplas portarias.
-
-Nenhuma dessas pendências deve ser cristalizada no banco antes do fechamento da modelagem.
+Não há decisão funcional pendente que impeça a consolidação do contrato ou do modelo físico. Integrações futuras, como gateway automático e contingência offline, permanecem como evolução técnica, não como pendências de negócio.
 
 
 ## ADDENDUM REVISAO 06 — Contrato após decisões fechadas
