@@ -1,3 +1,5 @@
+> **Nota de histórico:** esta revisão registra o estado de análise do domínio na data em que foi realizada. Regras posteriormente consolidadas estão refletidas no ADR-004 e no modelo relacional canônico.
+
 # Revisão V3 — Atendimento + Comandas + Cozinha
 
 ## Objetivo
