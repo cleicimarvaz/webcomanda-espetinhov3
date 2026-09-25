@@ -1,3 +1,5 @@
+> **Nota de histórico:** as decisões funcionais registradas como pendentes durante esta revisão foram posteriormente fechadas no ADR-004. Este documento preserva o estado da análise na data da revisão.
+
 # Revisão V3 — Catálogo + Estoque
 
 ## Objetivo
