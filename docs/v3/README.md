@@ -33,8 +33,8 @@ Esta pasta concentra a documentação de arquitetura, domínio, auditoria, decis
 - Revisões de Eventos + Ingressos: concluída
 - Revisões de Relatórios + Impressão: concluída
 - Decisões de negócio: consolidadas no ADR-004
-- Revisão final do modelo relacional: em consolidação
-- SQL físico definitivo: ainda não consolidado
+- Revisão final do modelo relacional: consolidada em 2026-09-25
+- SQL físico definitivo: ainda não consolidado — próxima etapa
 - Banco V3: ainda não criado
 
 ## Regra importante
