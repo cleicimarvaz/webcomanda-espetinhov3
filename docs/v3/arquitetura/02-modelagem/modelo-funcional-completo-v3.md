@@ -97,11 +97,11 @@ Dados conceituais:
 O produto pertence à empresa.
 
 ### Preço do produto
-Para não bloquear a decisão de preço futuro, o modelo deve suportar:
+A decisão fechada de preço é preço padrão da empresa com possibilidade de sobrescrita por unidade. O modelo suporta essa regra por meio de produto_precos.
 - preço padrão da empresa;
 - substituição de preço por unidade.
 
-Entidade candidata:
+Entidade:
 produto_precos
 
 Campos conceituais:
@@ -133,7 +133,7 @@ produto_composicao
 Relações:
 produto (combo) 1:N produto_composicao N:1 produto (componente)
 
-A composição deve suportar quantidade e, futuramente, regras de estoque derivado.
+A composição suporta quantidade e usa estratégia de estoque definida por produto: COMPONENTES ou PROPRIO.
 
 ### Complementos
 Representam opções que podem ser adicionadas ao pedido.
@@ -144,7 +144,7 @@ A V3 deve separar:
 - quais produtos aceitam o complemento;
 - seleção feita no item da venda.
 
-Entidades candidatas:
+Entidades:
 - grupos_complemento
 - complementos
 - produto_complementos
@@ -184,7 +184,7 @@ Deve conter:
 ### Inventário
 Representa uma contagem física.
 
-Recomendação para a V3:
+Estrutura definida para a V3:
 inventarios + inventario_itens
 
 Cada item deve guardar:
@@ -197,7 +197,7 @@ Cada item deve guardar:
 Isso evita guardar a contagem apenas em JSONB.
 
 ### Transferência de estoque
-Para suportar múltiplas unidades, é recomendável prever uma entidade própria antes de fechar o modelo físico:
+Para múltiplas unidades, a V3 utiliza uma entidade própria de transferência de estoque:
 
 transferencias_estoque
 transferencia_itens
@@ -207,7 +207,7 @@ unidade origem → unidade destino
 
 e geraria movimentações vinculadas à mesma operação.
 
-O recurso pode ficar desativado na primeira entrega, mas o modelo não deve impedir sua implementação.
+O recurso faz parte do modelo da V3 e pode ter sua ativação operacional controlada por permissão.
 
 ## 4. Atendimento e comandas
 
@@ -243,7 +243,7 @@ Dados:
 - horários de inclusão/alteração/cancelamento.
 
 ### Pedido / lançamento para cozinha
-Para preservar o histórico de cada envio, é recomendável separar o conceito de lançamento:
+Para preservar o histórico de cada envio, o lançamento para cozinha é separado em:
 
 pedidos
 pedido_itens
@@ -311,7 +311,7 @@ Mesmo que inicialmente exista apenas um método por venda, o modelo deve suporta
 
 venda_pagamentos
 
-Isso permite futuramente:
+Isso permite:
 - pagamento dividido;
 - mais de uma forma de pagamento;
 - conciliação;
@@ -434,7 +434,7 @@ Pode possuir:
 - status.
 
 ### Mesas do evento
-A V2 guarda mesas em JSONB. Para a V3 é recomendável prever:
+A V2 guarda mesas em JSONB. Para a V3 será utilizado:
 
 evento_mesas
 
@@ -589,7 +589,7 @@ A V3 deve separar conceitualmente:
 - arquivo privado/documento;
 - backup.
 
-Metadados de arquivo podem ser associados à entidade de origem quando a necessidade aparecer no modelo funcional.
+Metadados de arquivo são associados à entidade de origem conforme definido no modelo relacional canônico.
 
 ## 17. Relatórios
 
