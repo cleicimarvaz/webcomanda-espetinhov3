@@ -1,3 +1,5 @@
+> **Nota de histórico:** esta migration foi desenhada durante a evolução incremental da V2. A regra funcional atual da V3 é diferente: saldo negativo é bloqueado por padrão e somente exceções administrativas autorizadas permitem ultrapassagem, com justificativa e auditoria. Esta migration **não deve ser usada para definir a regra final do banco V3**.
+
 # Migration 007 — Baixa de estoque transacional
 
 **Status: rascunho — não executar em produção.**
