@@ -1,3 +1,5 @@
+> **Nota de histórico:** esta revisão registra o estado de análise do domínio na data em que foi realizada. Regras posteriores estão consolidadas no ADR-004 e no modelo relacional canônico.
+
 # Revisão V3 — Vendas + Caixa + Financeiro
 
 ## Objetivo
