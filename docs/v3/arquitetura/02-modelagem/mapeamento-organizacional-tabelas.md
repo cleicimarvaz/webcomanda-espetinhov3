@@ -2,14 +2,15 @@
 
 > Este documento foi produzido durante a fase inicial de modelagem. As decisões que apareciam como abertas já foram fechadas no ADR-004. Para o estado atual, consulte o [modelo relacional canônico](modelo-relacional-completo-v3.md).
 
- Legenda
+
+## Legenda
 
 - **Global** — pertence à aplicação e não depende de empresa/unidade.
 - **Empresa** — compartilhado entre as unidades de uma empresa.
 - **Unidade** — pertence diretamente a uma unidade operacional.
 - **Relacionado** — herda o contexto de outra entidade, por exemplo evento ou usuário.
 - **Público controlado** — possui uma parte do fluxo acessível sem autenticação, mas não deve ficar livremente exposto.
-- **A decidir** — depende de uma regra de negócio que ainda precisa ser fechada.
+- **Histórico** — classificação mantida por rastreabilidade; quando houver conflito, prevalece o modelo relacional canônico e o ADR-004.
 
 ## Mapa das 21 tabelas
 
@@ -17,11 +18,11 @@
 |---|---|---|
 | `usuarios` | Global/identidade | A identidade deve existir uma vez. O acesso a empresas/unidades deve ficar em vínculos próprios. |
 | `auditoria` | Empresa + unidade, quando aplicável | O evento precisa registrar o contexto da operação. Eventos puramente técnicos podem não ter unidade. |
-| `fornecedores` | Empresa | Cadastro pode ser compartilhado pelas unidades da mesma empresa. Caso o negócio exija fornecedores exclusivos, o vínculo pode ser restringido posteriormente. |
+| `fornecedores` | Empresa | Cadastro compartilhado pelas unidades da mesma empresa. |
 | `clientes` | Empresa | Cliente tende a ser cadastro compartilhado. As operações financeiras/vendas carregam o contexto da unidade. |
 | `produtos` | Empresa | Catálogo pode ser compartilhado entre unidades. Disponibilidade e estoque devem ser tratados separadamente. |
 | `produto_composicao` | Empresa | A composição pertence ao produto/combinação do catálogo. |
-| `historico_precos` | A decidir: empresa/unidade | Se o mesmo produto tiver preços diferentes por unidade, o histórico precisa carregar `unidade_id` ou uma estrutura de preço por unidade. |
+| `historico_precos` | Empresa/unidade | Registra preço padrão da empresa e sobrescritas por unidade, conforme o modelo canônico. |
 | `inventarios` | Unidade | Inventário representa uma contagem física realizada em uma unidade específica. |
 | `estoque_movimentacoes` | Unidade | Entrada, saída e ajuste representam movimentação física de uma unidade. |
 | `complementos` | Empresa | Cadastros de complementos podem ser compartilhados; disponibilidade por unidade pode ser adicionada se necessário. |
