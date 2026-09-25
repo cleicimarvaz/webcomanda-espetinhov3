@@ -784,7 +784,9 @@ Uma venda pode gerar vários ingressos individuais. Cada ingresso mantém códig
 ### Entidades adicionais propostas
 
 - `solicitacoes_ingresso`;
-- `solicitacao_ingresso_itens`.
+- `solicitacao_ingresso_itens`;
+- `arquivos`;
+- `impressoes`.
 
 Essas entidades representam a intenção pública antes da emissão quando houver confirmação financeira posterior.
 
