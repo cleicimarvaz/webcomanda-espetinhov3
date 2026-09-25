@@ -84,7 +84,7 @@ Uma direção futura possível é:
 
 `produtos` → `estoques_produto_unidade` → `estoque_movimentacoes`.
 
-Essa estrutura será detalhada depois da decisão sobre preço compartilhado x preço por unidade.
+Essa estrutura está consolidada: `produto_precos` suporta preço padrão da empresa e sobrescrita por unidade.
 
 ## Vendas e caixa
 
@@ -131,14 +131,6 @@ Para registros empresariais:
 
 Para registros herdados, a policy segue a FK até o evento/caixa/unidade correspondente.
 
-## Próxima etapa
+## Status atual
 
-Antes de escrever a primeira migration, validar as decisões ainda abertas de:
-
-1. preço por unidade;
-2. cliente/fornecedor compartilhado;
-3. despesas corporativas;
-4. metas por empresa/unidade;
-5. escopo dos eventos;
-6. configuração por escopo;
-7. estratégia de estoque por unidade.
+As decisões listadas na versão original foram consolidadas no ADR-004. O modelo relacional canônico define atualmente preço padrão + sobrescrita por unidade, clientes/fornecedores por empresa, despesas e eventos com unidade opcional, metas por empresa/unidade e configurações por escopo.
