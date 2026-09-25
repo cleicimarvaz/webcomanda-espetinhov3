@@ -3,3 +3,6 @@ arq/servidor-impressao/*.exe
 arq/servidor-impressao/build/
 arq/servidor-impressao/dist/
 arq/servidor-impressao/__pycache__/
+
+# PostgreSQL local
+infra/postgres/.env
