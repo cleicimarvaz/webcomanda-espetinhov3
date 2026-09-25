@@ -1,5 +1,7 @@
 # Modelo relacional organizacional da V3
 
+> Documento-base da fundação organizacional. Para o modelo atual completo, use `modelo-relacional-completo-v3.md`.
+
 Este documento transforma o modelo conceitual de empresa, unidade, usuário, papel e permissão em uma proposta relacional. Ainda não é uma migration SQL.
 
 ## Núcleo organizacional
@@ -68,7 +70,7 @@ Campos conceituais:
 - `created_at`;
 - `updated_at`.
 
-Regra: `unidade_id`, quando informado, deve pertencer à mesma `empresa_id`.
+Regra: `unidade_id`, quando informado, deve pertencer à mesma `empresa_id`. Vínculo com unidade nula pode representar escopo empresarial, conforme o papel.
 
 Essa estrutura permite:
 
@@ -127,7 +129,7 @@ Quando `membros_organizacao.unidade_id` estiver preenchido, o usuário possui aq
 
 Quando estiver nulo, o vínculo pode representar um acesso de escopo empresarial, desde que o papel permita esse comportamento.
 
-A aplicação deverá selecionar uma unidade ativa para os fluxos operacionais, mas o banco deve validar se o usuário possui vínculo com ela.
+A aplicação deverá selecionar uma unidade ativa para os fluxos operacionais, mas o banco deve validar se o usuário possui vínculo com ela. Para vínculos empresariais, o usuário poderá escolher entre as unidades permitidas.
 
 ## Integridade
 
