@@ -1,5 +1,7 @@
 # Modelo organizacional da V3
 
+> Documento-base da fundação organizacional. As regras funcionais atuais complementares estão consolidadas no ADR-004 e no modelo relacional canônico.
+
 ## Objetivo
 
 Definir a estrutura que permitirá que o WebComanda seja utilizado por uma empresa com uma ou várias unidades, sem misturar dados entre contextos.
@@ -77,19 +79,19 @@ Exemplo: cadastro compartilhado entre unidades, quando houver necessidade.
 
 ### Específica da unidade
 
-Exemplo: caixa, estoque, comandas, mesas e operações do estabelecimento.
+Exemplo: caixa, estoque, comandas e operações do estabelecimento. A mesa de atendimento comum é apenas um identificador da sessão de comanda; mesas de evento possuem entidade própria.
 
 ### Preferência do usuário
 
 Exemplo: tema, preferências pessoais e determinadas opções de impressão.
 
-Essa classificação deve ser definida antes da migração de cada tabela.
+Essa classificação está consolidada para a V3; sua representação física será refletida no modelo relacional e no SQL definitivo.
 
 ## Diretriz para as tabelas atuais
 
 Na migração, tabelas como `caixa`, `comandas`, `estoque_movimentacoes`, `inventarios`, `despesas` e operações de venda devem receber contexto organizacional explícito quando o negócio exigir isolamento por unidade.
 
-Cadastros como `produtos`, `clientes` e `fornecedores` deverão ter uma decisão específica sobre serem compartilhados pela empresa ou mantidos por unidade.
+Cadastros como `produtos`, `clientes` e `fornecedores` são compartilhados dentro da empresa. Preços podem possuir sobrescrita por unidade; estoque é sempre por unidade.
 
 ## RLS
 
