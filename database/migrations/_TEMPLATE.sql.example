@@ -1,18 +1,10 @@
--- TEMPLATE ILUSTRATIVO — NÃO EXECUTAR ESTE ARQUIVO.
--- Salve migrations reais como arquivos .sql numerados, por exemplo:
--- 001_nome_da_mudanca.sql
+-- Template ilustrativo para Dbmate. Não execute este arquivo.
+-- Gere uma migration real com: dbmate new nome_da_mudanca
 
--- Objetivo: <descrever a única mudança desta migration>
--- Dependências: <migrations anteriores necessárias>
--- Risco/impacto: <descrever impactos e possíveis bloqueios>
--- Recuperação: <rollback seguro ou plano de restauração>
+-- migrate:up
+-- SQL de avanço revisado será colocado aqui.
 
--- Use BEGIN/COMMIT se todos os comandos forem compatíveis com transação.
--- BEGIN;
+-- migrate:down
+-- SQL de reversão revisado será colocado aqui.
 
--- Coloque aqui os comandos SQL revisados e testados.
-
--- COMMIT;
-
--- Não edite uma migration já aplicada em ambiente compartilhado.
--- Corrija-a com uma nova migration.
+-- Atenção: o bloco migrate:down precisa ser avaliado para evitar perda de dados.
