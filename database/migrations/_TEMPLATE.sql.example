@@ -1,0 +1,18 @@
+-- TEMPLATE ILUSTRATIVO — NÃO EXECUTAR ESTE ARQUIVO.
+-- Salve migrations reais como arquivos .sql numerados, por exemplo:
+-- 001_nome_da_mudanca.sql
+
+-- Objetivo: <descrever a única mudança desta migration>
+-- Dependências: <migrations anteriores necessárias>
+-- Risco/impacto: <descrever impactos e possíveis bloqueios>
+-- Recuperação: <rollback seguro ou plano de restauração>
+
+-- Use BEGIN/COMMIT se todos os comandos forem compatíveis com transação.
+-- BEGIN;
+
+-- Coloque aqui os comandos SQL revisados e testados.
+
+-- COMMIT;
+
+-- Não edite uma migration já aplicada em ambiente compartilhado.
+-- Corrija-a com uma nova migration.
