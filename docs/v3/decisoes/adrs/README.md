@@ -6,3 +6,4 @@ Decisões arquiteturais, de dados e funcionais registradas na evolução da V3.
 - ADR-002 — modelo relacional organizacional
 - ADR-003 — banco V3 separado
 - ADR-004 — fechamento das decisões de negócio
+- ADR-005 — backend/API server-side para PostgreSQL portável
