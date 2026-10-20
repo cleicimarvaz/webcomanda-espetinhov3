@@ -25,7 +25,7 @@ services:
   # Ferramenta de migrations SQL. Só executa quando chamada explicitamente
   # com --profile migrations; não inicia junto com o PostgreSQL normalmente.
   dbmate:
-    image: ghcr.io/amacneil/dbmate:v2.37.0
+    image: ghcr.io/amacneil/dbmate:2.36.0
     profiles: ["migrations"]
     depends_on:
       postgres:
