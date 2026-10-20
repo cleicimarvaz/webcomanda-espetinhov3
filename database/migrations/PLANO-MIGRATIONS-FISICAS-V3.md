@@ -8,7 +8,7 @@ Este documento define a ordem de construção do SQL físico. Os grupos abaixo s
 
 ## Antes de escrever a primeira migration
 
-A revisão de fundação, identidade, tenant e acesso ao PostgreSQL está documentada em [REVISAO-FISICA-GRUPO-A.md](REVISAO-FISICA-GRUPO-A.md). Ela está em proposta e aponta cinco pendências que bloqueiam SQL executável; não é uma migration e não deve ser aplicada ao banco.
+A revisão de fundação, identidade, tenant e acesso ao PostgreSQL está documentada em [REVISAO-FISICA-GRUPO-A.md](REVISAO-FISICA-GRUPO-A.md). A fronteira server-side/API está aceita no [ADR-005](../../docs/v3/decisoes/adrs/ADR-005-backend-api-postgresql-portavel.md); as demais decisões de autenticação, identidade, RLS e privilégios ainda precisam ser fechadas. Este documento é planejamento, não uma migration, e não deve ser aplicado ao banco.
 
 
 Resolver e documentar estes detalhes físicos para o modelo inteiro:
@@ -18,7 +18,7 @@ Resolver e documentar estes detalhes físicos para o modelo inteiro:
 3. Tipos padronizados: dinheiro (`numeric` com precisão acordada), quantidades decimais, datas (`timestamptz` para instantes), JSONB apenas onde houver necessidade real e códigos de estado consistentes.
 4. Política de exclusão por FK: preservar operações financeiras, vendas, auditoria, ingressos e movimentos; evitar `CASCADE` em histórico de negócio.
 5. Constraints de unicidade, vigência e concorrência: escopo empresarial, um caixa/inventário ativo por unidade, reservas incompatíveis e limites de lotes de ingresso.
-6. Estratégia de autenticação e contexto de sessão que permitirá implementar RLS de forma real e testável.
+6. Provedor/fluxo de autenticação, contexto de sessão e desenho de RLS que permita testar acesso autorizado e negado.
 7. Estratégia de Storage desacoplada do provedor e política de visibilidade dos arquivos.
 8. Critérios de teste e recuperação para cada migration.
 
