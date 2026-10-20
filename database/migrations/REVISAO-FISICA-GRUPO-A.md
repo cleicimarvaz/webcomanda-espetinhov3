@@ -8,10 +8,11 @@
 
 Definir os padrões físicos que orientarão a primeira migration de domínio da V3 e evitar misturar decisões de identidade, autorização e estrutura organizacional com tabelas comerciais.
 
-Referências funcionais:
+Referências funcionais e técnicas:
 
 - `docs/v3/arquitetura/02-modelagem/modelo-relacional-completo-v3.md`
 - `docs/v3/decisoes/adrs/ADR-004-fechamento-decisoes-negocio-v3.md`
+- `docs/v3/decisoes/adrs/ADR-005-backend-api-postgresql-portavel.md`
 - `database/migrations/PLANO-MIGRATIONS-FISICAS-V3.md`
 
 ## 1. Padrões de tipos propostos
@@ -106,9 +107,9 @@ Não criar cascatas que apaguem auditoria quando um usuário ou registro de neg�
 
 ### 6.1 Implicação da escolha de PostgreSQL portável
 
-Uma aplicação hospedada na Vercel não deve conectar o navegador diretamente ao PostgreSQL com uma `DATABASE_URL`. A conexão com credenciais fica no servidor/backend; o navegador chama endpoints autenticados. Esta é uma mudança arquitetural em relação aos módulos V2 que usam diretamente o cliente Supabase no frontend.
+Decisão aceita no ADR-005: todo acesso da V3 ao PostgreSQL é feito por backend/API server-side. Uma aplicação hospedada na Vercel não deve conectar o navegador diretamente ao PostgreSQL com uma `DATABASE_URL`. A conexão com credenciais fica no servidor/backend; o navegador chama endpoints autenticados.
 
-Para a V3 ser realmente portável entre PostgreSQL local, Neon, Supabase e VPS, o backend não deve depender obrigatoriamente de APIs específicas do Supabase para acesso ao banco.
+A API server-side deverá usar SQL/driver PostgreSQL e não depender obrigatoriamente de APIs específicas do Supabase para acesso aos dados. A V2 mantém o acesso atual durante a migração gradual.
 
 ### 6.2 Contexto de usuário e RLS
 
@@ -146,8 +147,8 @@ RLS será obrigatório antes de integrar a aplicação V3 a dados reais. As poli
 
 1. Aprovar ou rejeitar a entidade `identidades_autenticacao`.
 2. Definir se papéis poderão ser personalizados por empresa na primeira entrega.
-3. Fechar a estratégia de autenticação da V3 e o backend server-side que fará o acesso ao PostgreSQL portável.
-4. Fechar a forma de definir o contexto de usuário na transação para RLS.
-5. Definir os papéis técnicos do banco e os privilégios do runtime.
+3. Selecionar o provedor e fechar o fluxo de autenticação, sessão e recuperação de acesso. A fronteira server-side/API para o PostgreSQL já está decidida no ADR-005.
+4. Fechar a forma de definir e validar o contexto de usuário/empresa/unidade por transação para RLS, incluindo testes com conexão reutilizada por pool.
+5. Definir os papéis técnicos do banco, os privilégios e a configuração de conexão do runtime.
 
 Essas pendências são de arquitetura física/segurança, não mudam o que já funciona no ambiente local. O banco deve continuar vazio de tabelas de domínio até elas serem fechadas.
