@@ -1,8 +1,9 @@
 # Migrations PostgreSQL — V3
 
-## Plano físico
+## Plano e revisão física
 
-Consulte [PLANO-MIGRATIONS-FISICAS-V3.md](PLANO-MIGRATIONS-FISICAS-V3.md) para a sequência proposta dos domínios e os pontos técnicos a resolver antes de gerar SQL executável.
+- [PLANO-MIGRATIONS-FISICAS-V3.md](PLANO-MIGRATIONS-FISICAS-V3.md): sequência proposta dos domínios.
+- [REVISAO-FISICA-GRUPO-A.md](REVISAO-FISICA-GRUPO-A.md): tipos, IDs, integridade organizacional, identidade, RLS e papéis do banco. É uma proposta técnica, não uma migration.
 
 ## Ferramenta adotada
 
