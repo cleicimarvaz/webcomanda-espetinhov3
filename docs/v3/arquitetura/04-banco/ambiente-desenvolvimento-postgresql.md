@@ -1,54 +1,85 @@
-# Ambiente de desenvolvimento PostgreSQL V3
+# PostgreSQL 18 local
 
-## Padrão adotado
+Este diretório contém a infraestrutura de desenvolvimento do banco V3.
 
-O ambiente local da V3 usa PostgreSQL 18.6 executado em Docker.
+## Objetivo
 
-A infraestrutura fica em `infra/postgres/` e o banco local é separado dos arquivos SQL definitivos.
+Subir PostgreSQL 18.6 local em Docker sem amarrar a aplicação a um provedor específico.
+O banco é um ambiente de desenvolvimento; as tabelas definitivas só serão criadas após a consolidação do SQL físico.
 
-## Estado validado
+## Requisitos
 
-- Container `webcomanda-postgres-v3` em estado healthy.
-- Banco `webcomanda_v3_dev` acessível na porta local 5432.
-- Conexão DBeaver confirmada.
-- Consulta `SELECT current_database(), current_user, version()` executada com sucesso.
-- Banco mantido sem tabelas de domínio até a consolidação do SQL físico.
+- Docker Desktop instalado e em execução.
+- Docker Compose disponível pelo comando `docker compose`.
 
-## Por que separar infraestrutura e schema
+## Primeira configuração
 
-O container garante um ambiente reproduzível. Os scripts SQL permanecem versionados no Git e podem ser aplicados posteriormente em outros ambientes PostgreSQL compatíveis.
+Copie `.env.example` para `.env` e ajuste a senha local. O `.env` não deve ser versionado.
 
-O container não executa o schema provisório automaticamente.
+## Subir e verificar PostgreSQL
 
-## Fluxo previsto
-
-~~~text
-desenvolvimento local
-        ↓
-PostgreSQL 18.6 + Docker
-        ↓
-migrations SQL versionadas
-        ↓
-testes e validação
-        ↓
-backup/restore validado
-        ↓
-ambiente remoto PostgreSQL
+~~~powershell
+docker compose up -d
+docker compose ps
+docker compose logs --tail=30 postgres
 ~~~
 
-O provedor do banco é tratado como detalhe de infraestrutura.
+## Acessar pelo DBeaver
 
-## Diretórios
+| Campo | Valor |
+|---|---|
+| Host | `localhost` |
+| Porta | `5432` |
+| Banco | `webcomanda_v3_dev` |
+| Usuário | valor de `POSTGRES_USER` no `.env` |
+| Senha | valor de `POSTGRES_PASSWORD` no `.env` |
 
-- `infra/postgres/`: Docker e configuração local.
-- `database/migrations/`: alterações estruturais versionadas.
-- `database/functions/`: funções PostgreSQL.
-- `database/seeds/`: dados iniciais e de desenvolvimento.
-- `database/tests/`: testes SQL.
-- `arq/`: arquivos históricos/provisórios da evolução anterior.
+## Migrations SQL com Dbmate
 
-## Regra de migração
+O serviço `dbmate` usa a imagem open source `ghcr.io/amacneil/dbmate:v2.37.0`. Ele fica no perfil opcional `migrations` e não é iniciado pelo `docker compose up -d` normal.
 
-O banco deve continuar sendo PostgreSQL padrão, evitando dependência obrigatória de recursos exclusivos de um provedor. Backup lógico e restauração devem fazer parte da validação antes de migrar para qualquer ambiente remoto.
+Execute os comandos a partir deste diretório.
 
-O banco definitivo ainda não foi construído. Esta documentação registra o ambiente local e o processo previsto, não a aprovação para executar o schema provisório.
+Ajuda (não altera o banco):
+
+~~~powershell
+docker compose --profile migrations run --rm dbmate --help
+~~~
+
+Status do histórico:
+
+~~~powershell
+docker compose --profile migrations run --rm dbmate status
+~~~
+
+Aplicar migrations pendentes depois de revisão explícita:
+
+~~~powershell
+docker compose --profile migrations run --rm dbmate migrate
+~~~
+
+Criar novo arquivo SQL de migration:
+
+~~~powershell
+docker compose --profile migrations run --rm dbmate new nome_da_mudanca
+~~~
+
+Não executar `migrate` até que exista uma migration física aprovada. Não use os arquivos provisórios de `arq/` como se fossem migrations definitivas.
+
+## Parar o container
+
+~~~powershell
+docker compose down
+~~~
+
+## Apagar os dados locais
+
+`docker compose down -v` remove o volume de dados do banco. **Não execute este comando como rotina.** Use somente se realmente quiser apagar e recriar o banco local.
+
+## Backup e migração
+
+O ambiente será tratado como PostgreSQL padrão. Backups lógicos e testes de restauração farão parte da preparação antes de qualquer migração para outro ambiente.
+
+## Regra da V3
+
+A aplicação dependerá de PostgreSQL, e não de um provedor específico. Docker, Neon, Supabase, VPS ou outro serviço poderão ser ambientes diferentes para a mesma base.
