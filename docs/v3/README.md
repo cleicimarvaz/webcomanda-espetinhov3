@@ -35,8 +35,9 @@ Esta pasta concentra a documentação de arquitetura, domínio, auditoria, decis
 - Decisões de negócio: consolidadas no ADR-004
 - Revisão final do modelo relacional: consolidada em 2026-09-25
 - Ambiente local PostgreSQL 18.6 + Docker: validado com DBeaver
-- Scripts SQL versionados: estrutura preparada; Dbmate configurado como runner de migrations via Docker
-- SQL físico definitivo: ainda não consolidado — próxima etapa
+- Scripts SQL versionados: estrutura preparada; Dbmate 2.36.0 validado via Docker
+- Revisão física do Grupo A (fundação/identidade/segurança): proposta registrada em `database/migrations/REVISAO-FISICA-GRUPO-A.md`; pendências arquiteturais ainda precisam ser fechadas
+- SQL físico definitivo: ainda não consolidado — não executar migrations de domínio
 - Banco V3 definitivo: ainda não criado; banco local segue sem tabelas de domínio
 
 ## Ambiente de banco
