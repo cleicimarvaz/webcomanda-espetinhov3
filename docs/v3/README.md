@@ -33,12 +33,17 @@ Esta pasta concentra a documentação de arquitetura, domínio, auditoria, decis
 - Revisões de Eventos + Ingressos: concluída
 - Revisões de Relatórios + Impressão: concluída
 - Decisões de negócio: consolidadas no ADR-004
+- Backend/API server-side para acesso PostgreSQL da V3: aceito no ADR-005; V2 permanece inalterada
 - Revisão final do modelo relacional: consolidada em 2026-09-25
 - Ambiente local PostgreSQL 18.6 + Docker: validado com DBeaver
 - Scripts SQL versionados: estrutura preparada; Dbmate 2.36.0 validado via Docker
-- Revisão física do Grupo A (fundação/identidade/segurança): proposta registrada em `database/migrations/REVISAO-FISICA-GRUPO-A.md`; pendências arquiteturais ainda precisam ser fechadas
+- Revisão física do Grupo A: proposta registrada em `database/migrations/REVISAO-FISICA-GRUPO-A.md`; pendências de autenticação, identidade e RLS ainda precisam ser fechadas
 - SQL físico definitivo: ainda não consolidado — não executar migrations de domínio
 - Banco V3 definitivo: ainda não criado; banco local segue sem tabelas de domínio
+
+## Backend e acesso ao banco
+
+A V3 acessará PostgreSQL exclusivamente por API server-side, conforme [ADR-005](decisoes/adrs/ADR-005-backend-api-postgresql-portavel.md). A arquitetura está documentada em [arquitetura-api-backend-v3.md](arquitetura/03-servicos/arquitetura-api-backend-v3.md). A V2 permanece no caminho atual durante a transição.
 
 ## Ambiente de banco
 
