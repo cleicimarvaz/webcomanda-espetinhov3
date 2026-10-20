@@ -36,7 +36,7 @@ docker compose logs --tail=30 postgres
 
 ## Migrations SQL com Dbmate
 
-O serviço `dbmate` usa a imagem open source `ghcr.io/amacneil/dbmate:v2.37.0`. Ele fica no perfil opcional `migrations` e não é iniciado pelo `docker compose up -d` normal.
+O serviço `dbmate` usa a imagem open source `ghcr.io/amacneil/dbmate:2.36.0`. Ele fica no perfil opcional `migrations` e não é iniciado pelo `docker compose up -d` normal.
 
 Execute os comandos a partir deste diretório.
 
