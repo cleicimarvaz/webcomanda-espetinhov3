@@ -1,5 +1,9 @@
 # Migrations PostgreSQL — V3
 
+## Plano físico
+
+Consulte [PLANO-MIGRATIONS-FISICAS-V3.md](PLANO-MIGRATIONS-FISICAS-V3.md) para a sequência proposta dos domínios e os pontos técnicos a resolver antes de gerar SQL executável.
+
 ## Ferramenta adotada
 
 A V3 usará **Dbmate** para controlar as migrations. Ele é open source, usa arquivos SQL simples, registra o histórico no banco e executa migrations de forma transacional em PostgreSQL. O runner está disponível via Docker; não é necessário instalar outro programa no Windows.
