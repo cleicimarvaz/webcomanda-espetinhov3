@@ -43,17 +43,19 @@ Como o banco V3 é separado do banco V2, IDs numéricos da V2 não serão tratad
 
 `usuarios` representa o perfil interno da aplicação; não armazena senhas nem tokens de sessão. A autenticação e a verificação das credenciais ficam em um serviço de autenticação.
 
-### 2.3 Entidade de identidade externa a considerar
+### 2.3 Better Auth e separação entre identidade e perfil
 
-Para não acoplar o schema a `auth.users`, `auth.uid()`, Supabase Auth ou a um único fornecedor de autenticação, propõe-se avaliar uma tabela `identidades_autenticacao` com:
+O ADR-006 aprova Better Auth como candidato principal para protótipo local. A adoção definitiva ainda depende dos testes de autenticação, sessão, segurança e integração com a API.
 
-- `id uuid` como PK;
-- `usuario_id uuid` como FK para `usuarios`;
-- `issuer text` e `subject text` para identificar a identidade emitida por um provedor;
-- `created_at timestamptz` e, se necessário, `last_authenticated_at timestamptz`;
-- unicidade em `(issuer, subject)` e índice em `usuario_id`.
+Proposta de protótipo:
 
-Essa entidade não está na lista canônica atual. Ela é uma proposta estrutural e só deve ser incorporada ao modelo funcional/relacional após aprovação. O schema não deve criar FK direta para tabelas de autenticação de um provedor.
+- tabelas próprias de Better Auth ficam em schema PostgreSQL separado, `auth`, via `database.schemaName`;
+- `auth.user` representa a identidade de autenticação gerida por Better Auth;
+- `public.usuarios` permanece o perfil interno da aplicação e não armazena senha nem token;
+- avaliar relação 1:1 por `public.usuarios.auth_user_id` → `auth.user.id`, se a geração e o tipo UUID forem confirmados no SQL gerado;
+- não criar inicialmente `identidades_autenticacao`, porque Better Auth já modela o usuário e as contas externas em suas próprias tabelas. Reavaliar somente se os casos de uso exigirem outra cardinalidade ou múltiplas identidades externas por perfil.
+
+A DDL gerada por Better Auth deve ser revisada e incorporada a migration Dbmate. Não executar o migrador da biblioteca diretamente contra o banco como parte do fluxo normal.
 
 ## 3. Organização e integridade de tenant
 
@@ -145,9 +147,9 @@ RLS será obrigatório antes de integrar a aplicação V3 a dados reais. As poli
 
 ## 8. Pendências que bloqueiam a primeira migration executável
 
-1. Aprovar ou rejeitar a entidade `identidades_autenticacao`.
+1. Validar localmente Better Auth conforme ADR-006 e conferir a DDL gerada antes de decidir definitivamente os nomes/tipos das tabelas de identidade.
 2. Definir se papéis poderão ser personalizados por empresa na primeira entrega.
-3. Selecionar o provedor e fechar o fluxo de autenticação, sessão e recuperação de acesso. A fronteira server-side/API para o PostgreSQL já está decidida no ADR-005.
+3. Confirmar o fluxo de recuperação de acesso, configurações de sessão/cookies, rate limiting e controles de origem/CSRF adequados.
 4. Fechar a forma de definir e validar o contexto de usuário/empresa/unidade por transação para RLS, incluindo testes com conexão reutilizada por pool.
 5. Definir os papéis técnicos do banco, os privilégios e a configuração de conexão do runtime.
 
