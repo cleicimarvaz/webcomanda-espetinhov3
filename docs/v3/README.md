@@ -34,6 +34,7 @@ Esta pasta concentra a documentação de arquitetura, domínio, auditoria, decis
 - Revisões de Relatórios + Impressão: concluída
 - Decisões de negócio: consolidadas no ADR-004
 - Backend/API server-side para acesso PostgreSQL da V3: aceito no ADR-005; V2 permanece inalterada
+- Better Auth: candidato principal aprovado para protótipo local no ADR-006; adoção definitiva aguarda os testes
 - Revisão final do modelo relacional: consolidada em 2026-09-25
 - Ambiente local PostgreSQL 18.6 + Docker: validado com DBeaver
 - Scripts SQL versionados: estrutura preparada; Dbmate 2.36.0 validado via Docker
@@ -44,6 +45,10 @@ Esta pasta concentra a documentação de arquitetura, domínio, auditoria, decis
 ## Backend e acesso ao banco
 
 A V3 acessará PostgreSQL exclusivamente por API server-side, conforme [ADR-005](decisoes/adrs/ADR-005-backend-api-postgresql-portavel.md). A arquitetura está documentada em [arquitetura-api-backend-v3.md](arquitetura/03-servicos/arquitetura-api-backend-v3.md). A V2 permanece no caminho atual durante a transição.
+
+## Autenticação e API
+
+A V3 acessará PostgreSQL exclusivamente por API server-side. Better Auth é o candidato aprovado para protótipo local, conforme [ADR-006](decisoes/adrs/ADR-006-better-auth-candidato-autenticacao-v3.md); o plano está em [prototipo-auth-better-auth.md](arquitetura/03-servicos/prototipo-auth-better-auth.md). O pacote ainda não foi instalado, o schema de autenticação não foi aplicado e a autenticação não está pronta para produção.
 
 ## Ambiente de banco
 
