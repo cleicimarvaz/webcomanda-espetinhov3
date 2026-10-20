@@ -61,8 +61,8 @@ PostgreSQL padrão
 
 ## O que esta decisão não define ainda
 
-- Provedor de autenticação, formato de sessão e fluxo de recuperação de acesso.
-- Se a identidade externa será representada por uma tabela `identidades_autenticacao` ou por outra abstração.
+- A adoção definitiva do provedor de autenticação: o ADR-006 aprova Better Auth como candidato principal para protótipo local, condicionado aos testes.
+- Mapeamento físico final entre a identidade de autenticação e o perfil `public.usuarios`.
 - Framework ou layout final da API além do padrão server-side; a primeira implementação poderá usar Vercel Functions Node.js em `api/` se compatível com o projeto.
 - Estratégia específica de pooling e URL do provedor de produção.
 - Contexto exato usado nas policies RLS e matriz final de privilégios.
@@ -99,7 +99,7 @@ Esses detalhes devem ser fechados antes da primeira migration de segurança e an
 
 ## Próximos passos
 
-1. Definir autenticação e sessão da V3.
+1. Validar localmente Better Auth conforme ADR-006.
 2. Atualizar a revisão física do Grupo A com os limites da API e os papéis de banco.
 3. Definir os contratos iniciais de API/serviços, incluindo saúde técnica sem expor detalhes sensíveis.
 4. Implementar e testar um esqueleto de API server-side sem ler ou modificar tabelas de domínio.
