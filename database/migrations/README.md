@@ -75,7 +75,8 @@ docker compose --profile migrations run --rm dbmate rollback
 6. Teste primeiro no banco local e valide o resultado antes de usar outro ambiente.
 7. Nunca aplique scripts em produção sem revisão, backup testado e plano de recuperação.
 8. O `migrate:down` deve ser escrito e revisado com cuidado. Uma reversão pode eliminar dados e não substitui backup.
-9. O serviço Dbmate só inicia quando chamado com `--profile migrations`; `docker compose up -d` continua subindo apenas o PostgreSQL.
+9. Execute apenas um runner de migration por vez; não inicie execuções de migration em paralelo.
+10. O serviço Dbmate só inicia quando chamado com `--profile migrations`; `docker compose up -d` continua subindo apenas o PostgreSQL.
 
 ## Fluxo enquanto estamos aprendendo
 
