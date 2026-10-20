@@ -12,29 +12,40 @@ database/
 └── tests/        # testes SQL e validações
 ~~~
 
+## Estado atual
+
+- Ambiente local preparado com Docker Desktop e PostgreSQL 18.6.
+- Conexão via DBeaver confirmada.
+- Consulta de verificação versionada em `tests/000-verificar-conexao.sql`.
+- Banco `webcomanda_v3_dev` intencionalmente sem tabelas de domínio.
+- SQL físico definitivo ainda não começou a ser aplicado.
+
 ## Regra importante
 
-O banco V3 ainda está em fase de consolidação do modelo físico.
+O banco V3 ainda está em fase de consolidação do modelo físico. A criação das tabelas definitivas não foi colocada aqui ainda, para evitar definir migrations antes de fechar tipos, constraints, índices, triggers, funções e RLS em conjunto.
 
-Por isso, a criação das tabelas definitivas não foi colocada aqui ainda. O objetivo é evitar que migrations sejam criadas antes de fechar tipos, constraints, índices, triggers, funções e RLS.
-
-Os arquivos SQL existentes em arq/ permanecem como base provisória ou histórico da evolução anterior.
+Os arquivos SQL existentes em `arq/` permanecem como base provisória ou histórico da evolução anterior.
 
 ## Princípios
 
 - PostgreSQL 18 como referência local.
 - Scripts sempre versionados no Git.
 - Nenhuma credencial real em arquivos versionados.
-- Alterações de estrutura serão numeradas e aplicadas em ordem.
-- O mesmo conjunto de scripts deverá funcionar em ambientes PostgreSQL compatíveis.
-- Produção não recebe scripts diretamente deste diretório sem validação e backup prévios.
+- Migrations numeradas, aplicadas em ordem e imutáveis depois de compartilhadas.
+- Testes no ambiente local antes de qualquer ambiente remoto.
+- Portabilidade como PostgreSQL padrão, evitando dependência desnecessária de um provedor.
+- Produção não recebe scripts sem revisão e backup testado.
+
+## Fluxo de trabalho
+
+1. Atualizar o repositório local com `git pull origin main`.
+2. Criar ou revisar o arquivo SQL no Git antes de executá-lo.
+3. Abrir o script no DBeaver e confirmar a conexão `webcomanda_v3_dev`.
+4. Executar somente scripts aprovados para a etapa atual.
+5. Validar os resultados e versionar as alterações.
+
+Consulte [migrations/README.md](migrations/README.md) para as convenções e cuidados de aplicação.
 
 ## Ambiente local
 
-A infraestrutura Docker está em:
-
-~~~text
-infra/postgres/
-~~~
-
-Consulte o README desse diretório para subir o PostgreSQL local.
+A infraestrutura Docker está em `infra/postgres/`. Consulte o README desse diretório para subir e verificar o PostgreSQL.
