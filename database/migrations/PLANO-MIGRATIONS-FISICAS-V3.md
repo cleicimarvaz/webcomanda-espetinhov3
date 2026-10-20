@@ -8,6 +8,9 @@ Este documento define a ordem de construção do SQL físico. Os grupos abaixo s
 
 ## Antes de escrever a primeira migration
 
+A revisão de fundação, identidade, tenant e acesso ao PostgreSQL está documentada em [REVISAO-FISICA-GRUPO-A.md](REVISAO-FISICA-GRUPO-A.md). Ela está em proposta e aponta cinco pendências que bloqueiam SQL executável; não é uma migration e não deve ser aplicada ao banco.
+
+
 Resolver e documentar estes detalhes físicos para o modelo inteiro:
 
 1. Estratégia de IDs e referências: especialmente `usuarios`, que precisa separar a identidade de autenticação do perfil interno e não depender de um provedor específico.
