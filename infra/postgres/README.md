@@ -1,113 +1,85 @@
 # PostgreSQL 18 local
 
-Este diretório contém somente a infraestrutura de desenvolvimento do banco V3.
+Este diretório contém a infraestrutura de desenvolvimento do banco V3.
 
 ## Objetivo
 
-Subir um PostgreSQL 18 local em Docker de forma reproduzível, sem amarrar a aplicação a um provedor específico.
-
-O banco criado aqui é um **ambiente vazio de desenvolvimento**. O schema físico definitivo da V3 ainda será consolidado posteriormente.
+Subir PostgreSQL 18.6 local em Docker sem amarrar a aplicação a um provedor específico.
+O banco é um ambiente de desenvolvimento; as tabelas definitivas só serão criadas após a consolidação do SQL físico.
 
 ## Requisitos
 
 - Docker Desktop instalado e em execução.
-- Docker Compose disponível pelo comando docker compose.
+- Docker Compose disponível pelo comando `docker compose`.
 
 ## Primeira configuração
 
-Na primeira utilização, copie .env.example para .env e ajuste a senha local.
+Copie `.env.example` para `.env` e ajuste a senha local. O `.env` não deve ser versionado.
 
-O arquivo .env não deve ser versionado.
+## Subir e verificar PostgreSQL
 
-## Subir o PostgreSQL
-
-A partir deste diretório:
-
-~~~bash
+~~~powershell
 docker compose up -d
-~~~
-
-Verificar o estado:
-
-~~~bash
 docker compose ps
+docker compose logs --tail=30 postgres
 ~~~
 
-Ver os logs:
+## Acessar pelo DBeaver
 
-~~~bash
-docker compose logs -f postgres
+| Campo | Valor |
+|---|---|
+| Host | `localhost` |
+| Porta | `5432` |
+| Banco | `webcomanda_v3_dev` |
+| Usuário | valor de `POSTGRES_USER` no `.env` |
+| Senha | valor de `POSTGRES_PASSWORD` no `.env` |
+
+## Migrations SQL com Dbmate
+
+O serviço `dbmate` usa a imagem open source `ghcr.io/amacneil/dbmate:v2.37.0`. Ele fica no perfil opcional `migrations` e não é iniciado pelo `docker compose up -d` normal.
+
+Execute os comandos a partir deste diretório.
+
+Ajuda (não altera o banco):
+
+~~~powershell
+docker compose --profile migrations run --rm dbmate --help
 ~~~
 
-Parar os containers:
+Status do histórico:
 
-~~~bash
+~~~powershell
+docker compose --profile migrations run --rm dbmate status
+~~~
+
+Aplicar migrations pendentes depois de revisão explícita:
+
+~~~powershell
+docker compose --profile migrations run --rm dbmate migrate
+~~~
+
+Criar novo arquivo SQL de migration:
+
+~~~powershell
+docker compose --profile migrations run --rm dbmate new nome_da_mudanca
+~~~
+
+Não executar `migrate` até que exista uma migration física aprovada. Não use os arquivos provisórios de `arq/` como se fossem migrations definitivas.
+
+## Parar o container
+
+~~~powershell
 docker compose down
 ~~~
 
-## Apagar também os dados locais
+## Apagar os dados locais
 
-Use somente quando quiser recriar o banco local do zero:
-
-~~~bash
-docker compose down -v
-~~~
-
-Isso remove o volume do PostgreSQL.
-
-## Conexão
-
-Com a configuração padrão:
-
-~~~text
-Host:     localhost
-Porta:    5432
-Database: webcomanda_v3_dev
-Usuário:  webcomanda
-~~~
-
-A aplicação poderá usar uma única variável de conexão, por exemplo:
-
-~~~env
-DATABASE_URL=postgresql://webcomanda:SENHA@localhost:5432/webcomanda_v3_dev
-~~~
-
-## SQL versionado
-
-Os scripts SQL da V3 serão mantidos no Git em:
-
-~~~text
-database/
-├── migrations/
-├── functions/
-├── seeds/
-└── tests/
-~~~
-
-Os arquivos atuais em arq/ continuam sendo históricos/provisórios conforme a documentação da V3.
-
-O PostgreSQL local **não executa automaticamente** o schema provisório. Isso é intencional: o banco físico definitivo só será aplicado quando o modelo relacional e o SQL final estiverem consolidados.
+`docker compose down -v` remove o volume de dados do banco. **Não execute este comando como rotina.** Use somente se realmente quiser apagar e recriar o banco local.
 
 ## Backup e migração
 
-O ambiente deve ser tratado como um PostgreSQL padrão. Para backup lógico:
-
-~~~bash
-pg_dump -h localhost -p 5432 -U webcomanda -d webcomanda_v3_dev -Fc -f backup.dump
-~~~
-
-Para restauração:
-
-~~~bash
-pg_restore -h localhost -p 5432 -U webcomanda -d webcomanda_v3_dev --clean --if-exists backup.dump
-~~~
-
-Os comandos podem ser executados de outra máquina ou de um container que tenha as ferramentas cliente instaladas.
-
-A mesma estratégia permite migrar posteriormente para outro PostgreSQL compatível sem alterar o modelo da aplicação apenas por causa do provedor.
+O ambiente será tratado como PostgreSQL padrão. Backups lógicos e testes de restauração farão parte da preparação antes de qualquer migração para outro ambiente.
 
 ## Regra da V3
 
-A aplicação dependerá de **PostgreSQL**, e não de um provedor específico.
-
-Docker, Neon, Supabase, VPS ou outro serviço poderão ser ambientes diferentes para o mesmo banco.
+A aplicação dependerá de PostgreSQL, e não de um provedor específico. Docker, Neon, Supabase, VPS ou outro serviço poderão ser ambientes diferentes para a mesma base.
