@@ -12,8 +12,8 @@ A infraestrutura está em `infra/postgres/`. O banco local é separado dos scrip
 - Banco `webcomanda_v3_dev` acessível na porta local 5432.
 - Conexão do DBeaver confirmada.
 - Consulta `SELECT current_database(), current_user, version()` executada com sucesso.
-- Banco mantido sem tabelas de domínio até a consolidação do SQL físico.
-- Dbmate configurado como serviço Docker opcional para migrations; ainda não executado no banco.
+- Dbmate 2.36.0 executado via Docker; `status` retornou `Applied: 0`, `Pending: 0`.
+- Nenhuma migration de domínio foi aplicada.
 
 ## Por que separar infraestrutura e schema
 
@@ -42,7 +42,7 @@ O provedor do banco é tratado como detalhe de infraestrutura.
 ## Diretórios
 
 - `infra/postgres/`: Docker e configuração local.
-- `database/migrations/`: migrations SQL.
+- `database/migrations/`: migrations SQL controladas pelo Dbmate.
 - `database/functions/`: funções PostgreSQL e documentação auxiliar.
 - `database/seeds/`: dados iniciais e de desenvolvimento.
 - `database/tests/`: testes SQL.
@@ -50,9 +50,9 @@ O provedor do banco é tratado como detalhe de infraestrutura.
 
 ## Processo de migrations
 
-O Dbmate é executado pelo perfil opcional `migrations` do Docker Compose, sem iniciar junto com o PostgreSQL por padrão. Os comandos operacionais estão descritos em `database/migrations/README.md`.
+O Dbmate é executado pelo perfil opcional `migrations` do Docker Compose. Ele não inicia no `docker compose up -d` normal. Os comandos operacionais estão descritos em `database/migrations/README.md`.
 
-Não executar `migrate` até que uma migration física tenha sido revisada e aprovada. Os arquivos provisórios em `arq/` não são migrations definitivas para este banco.
+Nenhuma migration de domínio deve ser executada até que seu SQL físico esteja revisado e aprovado. Os arquivos provisórios em `arq/` não são migrations definitivas para este banco.
 
 ## Regra de migração
 
